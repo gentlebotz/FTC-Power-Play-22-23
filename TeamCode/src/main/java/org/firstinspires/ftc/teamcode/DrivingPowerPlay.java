@@ -1,30 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 //import com.qualcomm.robotcore.util.Hardware;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
-import static android.os.SystemClock.currentThreadTimeMillis;
-import static android.os.SystemClock.setCurrentTimeMillis;
-import static android.os.SystemClock.sleep;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -40,9 +24,9 @@ import static android.os.SystemClock.sleep;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "Slider test", group = "Iterative Opmode")
+@TeleOp(name = "DrivingPP", group = "Iterative Opmode")
 //@Disabled
-public class SliderTest extends OpMode {
+public class DrivingPowerPlay extends OpMode {
     // Declare OpMode members.
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -58,7 +42,7 @@ public class SliderTest extends OpMode {
     private DcMotor sliderRight = null;
     private TouchSensor sliderLimitSwitch = null;
     private Servo intakeArmServo = null;
-    private Servo intakeWheelServo = null;
+    private CRServo intakeWheelServo = null;
 
     // Variables
     private double power = 1;
@@ -119,7 +103,7 @@ public class SliderTest extends OpMode {
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
         intakeArmServo =  hardwareMap.get(Servo.class, "intakeArmServo");
-        intakeWheelServo = hardwareMap.get(Servo.class, "intakeWheelServo");
+        intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
 
         //  Motor Direction
         rightRear.setDirection(DcMotor.Direction.FORWARD);
@@ -129,6 +113,9 @@ public class SliderTest extends OpMode {
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
         sliderRight.setDirection(DcMotor.Direction.REVERSE);
 
+        intakeWheelServo.setDirection(Servo.Direction.FORWARD);
+        intakeWheelServo.
+
         //Encoders
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -136,37 +123,8 @@ public class SliderTest extends OpMode {
         telemetry.addData("Status: ", "Busy");
         telemetry.update();
 
-        // Slider calibration
-        sliderRight.setTargetPosition(500);
-        sliderLeft.setTargetPosition(500);
-
-        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sliderRight.setPower(0.5);
-        sliderLeft.setPower(0.5);
-        while(Math.abs(500 - sliderLeft.getCurrentPosition()) >= 10){
-            //Do nothing
-        }
-
-        // Move slider down until it reaches limit switch
-        sliderRight.setPower(0.2);
-        sliderLeft.setPower(0.2);
-        while(sliderLimitSwitch.isPressed() && sliderLeft.getTargetPosition() >= -800){
-            sliderLeft.setTargetPosition(sliderLeft.getTargetPosition() - 10);
-            sliderRight.setTargetPosition(sliderRight.getTargetPosition() - 10);
-        }
-
         sliderLeft.setPower(0);
         sliderRight.setPower(0);
-
-        sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        sliderRight.setTargetPosition(0);
-        sliderLeft.setTargetPosition(0);
-
-        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
@@ -184,6 +142,7 @@ public class SliderTest extends OpMode {
      */
     @Override
     public void loop() {
+        // Gamepad Inputs
         double G1leftStickY = -gamepad1.left_stick_y;
         double G1leftStickX = -gamepad1.left_stick_x;
         double G1rightStickX = gamepad1.right_stick_x;
@@ -191,6 +150,7 @@ public class SliderTest extends OpMode {
         double G2rightStickX = -gamepad2.right_stick_x;
         double G2leftStickY = -gamepad2.left_stick_y;
 
+        // Holonomic wheel movement
         rightRear.setPower(power2 * (G1leftStickY + -G1leftStickX + 1.2 * -G1rightStickX));
         leftRear.setPower(power2 * (G1leftStickY + G1leftStickX + 1.2 * G1rightStickX));
         rightFront.setPower(power2 * (G1leftStickY + G1leftStickX + 1.2 * -G1rightStickX));
@@ -227,9 +187,7 @@ public class SliderTest extends OpMode {
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
             sliderLeft.setPower(0.5);
             sliderRight.setPower(0.5);
-        }
-
-        else{
+        } else {
             sliderLeft.setPower(0);
             sliderRight.setPower(0);
         }
@@ -276,23 +234,19 @@ public class SliderTest extends OpMode {
 
         // Intake wheels control
         if(gamepad2.b){
-            // Power wheels to pickup game pieces
-            // Use setPosition or Power?
+            intakeWheelServo.setPower(1);
         }
 
         if(gamepad2.x){
-            // Power wheels to drop game pieces
-            // Use setPosition or Power?
+            intakeWheelServo.setPower(0);
         }
 
         // Turbo mode
         if (gamepad1.left_bumper && turboStop) {
             turboStop = false;
             turbo = !turbo;
-            //power2 = turbo ? 1 : 0.5;
-        }
-
-        else if (!gamepad1.left_bumper) {
+            power2 = turbo ? 1 : 0.5;
+        } else if (!gamepad1.left_bumper) {
             turboStop = true;
         }
 
@@ -318,6 +272,7 @@ public class SliderTest extends OpMode {
         leftFront.setPower(0);
         sliderLeft.setPower(0);
         sliderRight.setPower(0);
+        intakeWheelServo.setPower(0.5);
     }
 
 }
