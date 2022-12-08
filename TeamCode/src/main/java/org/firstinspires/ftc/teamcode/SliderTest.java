@@ -58,7 +58,7 @@ public class SliderTest extends OpMode {
     private DcMotor sliderRight = null;
     private TouchSensor sliderLimitSwitch = null;
     private Servo intakeArmServo = null;
-    private Servo intakeWheelServo = null;
+    private CRServo intakeWheelServo = null;
 
     // Variables
     private double power = 1;
@@ -70,7 +70,7 @@ public class SliderTest extends OpMode {
     private int speed2 = 120;
     private int current;
     private int incr;
-    private int maxHeight = 3000;
+    private int maxHeight = 2300;
     private int minHeight = -10;
 
     private enum LiftState{
@@ -96,6 +96,8 @@ public class SliderTest extends OpMode {
         ARM_DROP
     }
 
+    private boolean aPressed = false;
+
     ArmState armState = ArmState.ARM_INTAKE;
 
     public static double mapRange(double a1, double a2, double b1, double b2, double s){
@@ -119,7 +121,7 @@ public class SliderTest extends OpMode {
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
         intakeArmServo =  hardwareMap.get(Servo.class, "intakeArmServo");
-        intakeWheelServo = hardwareMap.get(Servo.class, "intakeWheelServo");
+        intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
 
         //  Motor Direction
         rightRear.setDirection(DcMotor.Direction.FORWARD);
@@ -137,27 +139,34 @@ public class SliderTest extends OpMode {
         telemetry.update();
 
         // Slider calibration
-        sliderRight.setTargetPosition(500);
-        sliderLeft.setTargetPosition(500);
+        sliderRight.setTargetPosition(400);
+        sliderLeft.setTargetPosition(400);
 
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
-        while(Math.abs(500 - sliderLeft.getCurrentPosition()) >= 10){
+        while(Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10){
             //Do nothing
         }
 
         // Move slider down until it reaches limit switch
         sliderRight.setPower(0.2);
         sliderLeft.setPower(0.2);
-        while(sliderLimitSwitch.isPressed() && sliderLeft.getTargetPosition() >= -800){
-            sliderLeft.setTargetPosition(sliderLeft.getTargetPosition() - 10);
-            sliderRight.setTargetPosition(sliderRight.getTargetPosition() - 10);
+
+        sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        while(!sliderLimitSwitch.isPressed()){
+            sliderLeft.setPower(-0.2);
+            sliderRight.setPower(-0.2);
         }
 
         sliderLeft.setPower(0);
         sliderRight.setPower(0);
+
+        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -225,8 +234,8 @@ public class SliderTest extends OpMode {
 
         // Power motors when more than 10 ticks away from target
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
-            sliderLeft.setPower(0.5);
-            sliderRight.setPower(0.5);
+            sliderLeft.setPower(0.4);
+            sliderRight.setPower(0.4);
         }
 
         else{
@@ -249,24 +258,33 @@ public class SliderTest extends OpMode {
 
         // Auto set intake positions
         switch(armState){
-            case ArmState.ARM_DROP:
-                if(gamepad2.a){
+            case ARM_DROP:
+                if(gamepad2.a && !aPressed){
                     intakeArmServo.setPosition(intakeArmDropPosition);
                     armState = ArmState.ARM_INTAKE;
+                    aPressed = true;
                 }
                 break;
-            case ArmState.ARM_INTAKE:
-                if(gamepad2.a){
-                    intakeArmServo.setPosition(intakeArmMidPostition);
+            case ARM_INTAKE:
+                if(gamepad2.a && !aPressed){
+                    intakeArmServo.setPosition(intakeArmPickupPosition);
                     armState = ArmState.ARM_MID;
+                    aPressed = true;
                 }
-            case ArmState.ARM_MID:
-                if(gamepad2.a){
-                    intakeArmServo.setPosition(intakeArmDropPosition);
+                break;
+            case ARM_MID:
+                if(gamepad2.a && !aPressed){
+                    intakeArmServo.setPosition(intakeArmMidPostition);
                     armState = ArmState.ARM_DROP;
+                    aPressed = true;
                 }
+                break;
             default:
                 armState = ArmState.ARM_DROP;
+        }
+
+        if (!gamepad2.a) {
+            aPressed = false;
         }
 
         // Reset intake position
@@ -276,25 +294,25 @@ public class SliderTest extends OpMode {
 
         // Intake wheels control
         if(gamepad2.b){
-            // Power wheels to pickup game pieces
-            // Use setPosition or Power?
-        }
-
-        if(gamepad2.x){
-            // Power wheels to drop game pieces
-            // Use setPosition or Power?
+            intakeWheelServo.setPower(1);
+        } else if(gamepad2.x){
+            intakeWheelServo.setPower(0);
+        } else {
+            intakeWheelServo.setPower(0.5);
         }
 
         // Turbo mode
         if (gamepad1.left_bumper && turboStop) {
             turboStop = false;
             turbo = !turbo;
-            //power2 = turbo ? 1 : 0.5;
+            power2 = turbo ? 1 : 0.5;
         }
 
         else if (!gamepad1.left_bumper) {
             turboStop = true;
         }
+
+        intakeArmServo.setPosition(G2rightStickX);
 
         // Telemetry
         telemetry.addData("Power mode: ", turbo ? "Turbo" : "No turbo");
@@ -302,6 +320,8 @@ public class SliderTest extends OpMode {
         telemetry.addData("Limit Switch", !sliderLimitSwitch.isPressed());
         telemetry.addData("Slider Left: ", sliderLeft.getCurrentPosition());
         telemetry.addData("Slider Right: ", sliderRight.getCurrentPosition());
+        telemetry.addData("Arm State: ", armState);
+        telemetry.addData("Arm intake servo: ", G2rightStickX);
 
         telemetry.update();
     }

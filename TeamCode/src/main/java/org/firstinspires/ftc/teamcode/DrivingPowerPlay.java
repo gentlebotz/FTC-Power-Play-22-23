@@ -113,9 +113,6 @@ public class DrivingPowerPlay extends OpMode {
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
         sliderRight.setDirection(DcMotor.Direction.REVERSE);
 
-        intakeWheelServo.setDirection(Servo.Direction.FORWARD);
-        intakeWheelServo.
-
         //Encoders
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -207,18 +204,18 @@ public class DrivingPowerPlay extends OpMode {
 
         // Auto set intake positions
         switch(armState){
-            case ArmState.ARM_DROP:
+            case ARM_DROP:
                 if(gamepad2.a){
                     intakeArmServo.setPosition(intakeArmDropPosition);
                     armState = ArmState.ARM_INTAKE;
                 }
                 break;
-            case ArmState.ARM_INTAKE:
+            case ARM_INTAKE:
                 if(gamepad2.a){
                     intakeArmServo.setPosition(intakeArmMidPostition);
                     armState = ArmState.ARM_MID;
                 }
-            case ArmState.ARM_MID:
+            case ARM_MID:
                 if(gamepad2.a){
                     intakeArmServo.setPosition(intakeArmDropPosition);
                     armState = ArmState.ARM_DROP;
