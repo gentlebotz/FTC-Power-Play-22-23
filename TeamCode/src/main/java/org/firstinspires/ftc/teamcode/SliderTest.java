@@ -288,17 +288,17 @@ public class SliderTest extends OpMode {
         }
 
         // Reset intake position
-        if (gamepad1.y && armState != armState.ARM_DROP) {
+        if (gamepad1.x && armState != armState.ARM_DROP) {
             armState = ArmState.ARM_DROP;
         }
 
         // Intake wheels control
         if(gamepad2.b){
             intakeWheelServo.setPower(1);
-        } else if(gamepad2.x){
-            intakeWheelServo.setPower(0);
+        } else if(gamepad2.y){
+            intakeWheelServo.setPower(-1);
         } else {
-            intakeWheelServo.setPower(0.5);
+            intakeWheelServo.setPower(0);
         }
 
         // Turbo mode
