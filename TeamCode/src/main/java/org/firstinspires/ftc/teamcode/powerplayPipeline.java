@@ -18,9 +18,9 @@ public class powerplayPipeline extends OpenCvPipeline {
     //  }
 
     //Color definitions
-    private final Scalar WHITE = new Scalar(255, 255, 255);
-    private final Scalar BLACK = new Scalar(0,0,0);
-    private final Scalar YELLOW = new Scalar(214, 157, 8);
+    private final Scalar CYAN = new Scalar(0, 255, 255);
+    private final Scalar MAGENTA = new Scalar(255,0,255);
+    private final Scalar YELLOW = new Scalar(225, 225, 0);
     private Scalar sumColors;
 
 
@@ -31,8 +31,8 @@ public class powerplayPipeline extends OpenCvPipeline {
     private double minColor;
 
     // Setup detection area bounds
-    static Point borderLeft = new Point(420,130);
-    static Point borderRight = new Point(680,470);
+    static Point borderLeft = new Point(440,270);
+    static Point borderRight = new Point(740,680);
 
     /*
     WHITE   = LEFT  (1)
@@ -47,11 +47,15 @@ public class powerplayPipeline extends OpenCvPipeline {
 
     private volatile ParkLocation location = ParkLocation.LEFT;
 
+    public volatile boolean error = false;
+    public volatile Exception debug;
+
     @Override
     public Mat processFrame(Mat input) {
         // Executed every time a new frame is dispatched
 
-        // Convert image to brightness independant YCrCb colorspace
+        try{
+        // Convert image to brightness independent YCrCb color space
         Imgproc.cvtColor(input, ycrcbMat, Imgproc.COLOR_RGB2YCrCb);
 
         // Get the material
@@ -66,21 +70,21 @@ public class powerplayPipeline extends OpenCvPipeline {
 
         // Decide the parking location and change border color accordingly
         if(sumColors.val[0] == minColor) {
-            location = ParkLocation.RIGHT;
-            Imgproc.rectangle(
-                    input,
-                    borderLeft,
-                    borderRight,
-                    BLACK,
-                    2
-            );
-        } else if(sumColors.val[2] == minColor){
             location = ParkLocation.MID;
             Imgproc.rectangle(
                     input,
                     borderLeft,
                     borderRight,
-                    YELLOW,
+                    CYAN,
+                    2
+            );
+        } else if(sumColors.val[1] == minColor){
+            location = ParkLocation.RIGHT;
+            Imgproc.rectangle(
+                    input,
+                    borderLeft,
+                    borderRight,
+                    MAGENTA,
                     2
             );
         } else{
@@ -89,7 +93,7 @@ public class powerplayPipeline extends OpenCvPipeline {
                     input,
                     borderLeft,
                     borderRight,
-                    WHITE,
+                    YELLOW,
                     4
             );
         }
@@ -102,7 +106,11 @@ public class powerplayPipeline extends OpenCvPipeline {
         // telemetry.addData("Location: ", location);
         // telemetry.update();
 
-        areaMat.release();
+        areaMat.release(); }
+        catch (Exception e) {
+            debug = e;
+            error = true;
+        }
         return input; // Return the image that will be displayed in the viewport
     }
 

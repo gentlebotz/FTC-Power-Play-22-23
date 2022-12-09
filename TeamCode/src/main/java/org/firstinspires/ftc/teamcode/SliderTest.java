@@ -86,9 +86,9 @@ public class SliderTest extends OpMode {
     private int midPole = 0;
     private int highPole = 0;
 
-    private double intakeArmPickupPosition = 0;
+    private double intakeArmPickupPosition = 0.2;
     private double intakeArmMidPostition = 0.5;
-    private double intakeArmDropPosition = 1;
+    private double intakeArmDropPosition = 0.8;
 
     private enum ArmState{
         ARM_INTAKE,
@@ -311,8 +311,6 @@ public class SliderTest extends OpMode {
         else if (!gamepad1.left_bumper) {
             turboStop = true;
         }
-
-        intakeArmServo.setPosition(G2rightStickX);
 
         // Telemetry
         telemetry.addData("Power mode: ", turbo ? "Turbo" : "No turbo");
