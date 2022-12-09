@@ -173,7 +173,7 @@ public class AutoPowerPlay extends LinearOpMode {
                                     sliderRight.setTargetPosition(800);
                                     sliderLeft.setTargetPosition(800);
 
-                                    intakeArmServo.setPosition(0);
+                                    intakeArmServo.setPosition(0.2);
                 })
 
                 .splineToLinearHeading(new Pose2d(-6, -29.33, Math.toRadians(45)), Math.toRadians(45)) // 45 deg hi approach
@@ -270,10 +270,50 @@ public class AutoPowerPlay extends LinearOpMode {
         TrajectorySequence parkRight1 = drive.trajectoryBuilder(trajLeft.end())
                 .lineToConstantHeading(new Vector2d(11.67, -11.67)) // Location 1
 
+        drive.setPoseEstimate(startPoseLeft);
+
+        // Slider calibration
+        sliderRight.setTargetPosition(400);
+        sliderLeft.setTargetPosition(400);
+
+        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderRight.setPower(0.5);
+        sliderLeft.setPower(0.5);
+        while(Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10){
+            //Do nothing
+        }
+
+        // Move slider down until it reaches limit switch
+        sliderRight.setPower(0.2);
+        sliderLeft.setPower(0.2);
+
+        sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        while(!sliderLimitSwitch.isPressed()){
+            sliderLeft.setPower(-0.2);
+            sliderRight.setPower(-0.2);
+        }
+
+        sliderLeft.setPower(0);
+        sliderRight.setPower(0);
+
+        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        sliderRight.setTargetPosition(0);
+        sliderLeft.setTargetPosition(0);
+
+        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         telemetry.addData("Status: ", "Initialized");
         telemetry.update();
 
-        drive.setPoseEstimate(startPoseLeft);
         while(!isStarted()){
             if(gamepad1.dpad_left && !StartLeft){
                 telemetry.addData("Starting location: ", "Left Side");
@@ -344,7 +384,6 @@ public class AutoPowerPlay extends LinearOpMode {
             sliderRight.setPower(0.25);
             while (opModeIsActive() && Math.abs(0 - sliderLeft.getCurrentPosition()) >= 4) {
             }
-            sleep(100);
             sliderLeft.setPower(0);
             sliderRight.setPower(0);
             break;
