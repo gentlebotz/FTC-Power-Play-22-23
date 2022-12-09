@@ -10,7 +10,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 //import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class powerplayPipeline extends OpenCvPipeline {
-    // Only needeed for EOCV Sim telemetry
+    // Only needed for EOCV Sim telemetry
     // Telemetry telemetry;
     //
     //  public powerplayPipeline(Telemetry telemetry) {
