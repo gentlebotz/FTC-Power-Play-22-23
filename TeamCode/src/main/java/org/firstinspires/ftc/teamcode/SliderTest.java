@@ -87,7 +87,7 @@ public class SliderTest extends OpMode {
     private int highPole = 0;
 
     private double intakeArmPickupPosition = 0.2;
-    private double intakeArmMidPostition = 0.5;
+    private double intakeArmMidPosition = 0.5;
     private double intakeArmDropPosition = 0.8;
 
     private enum ArmState{
@@ -274,7 +274,7 @@ public class SliderTest extends OpMode {
                 break;
             case ARM_MID:
                 if(gamepad2.a && !aPressed){
-                    intakeArmServo.setPosition(intakeArmMidPostition);
+                    intakeArmServo.setPosition(intakeArmMidPosition);
                     armState = ArmState.ARM_DROP;
                     aPressed = true;
                 }
