@@ -54,8 +54,10 @@ public class DrivingPowerPlay extends OpMode {
     private int speed2 = 120;
     private int current;
     private int incr;
-    private int maxHeight = 2400;
+    private int maxHeight = 2500;
     private int minHeight = -10;
+
+    private ElapsedTime intakeTimer = new ElapsedTime();
 
     private enum LiftState{
         LIFT_START,
@@ -72,7 +74,8 @@ public class DrivingPowerPlay extends OpMode {
 
     private double intakeArmPickupPosition = 0.2;
     private double intakeArmMidPosition = 0.5;
-    private double intakeArmDropPosition = 0.8;
+    private double intakeArmDropPosition = 1;
+    private double intakeArmTarget = 0.1;
 
     private enum ArmState{
         ARM_INTAKE,
@@ -122,8 +125,14 @@ public class DrivingPowerPlay extends OpMode {
         telemetry.addData("Status: ", "Busy");
         telemetry.update();
 
-        sliderLeft.setPower(0);
-        sliderRight.setPower(0);
+        sliderLeft.setTargetPosition(0);
+        sliderRight.setTargetPosition(0);
+
+        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        intakeTimer.startTime();
+        intakeTimer.reset();
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
@@ -159,7 +168,7 @@ public class DrivingPowerPlay extends OpMode {
         current =  sliderLeft.getCurrentPosition();
 
         int current = sliderLeft.getCurrentPosition();
-        int incr = (int)(-gamepad2.left_stick_y * speed2);
+        int incr = (int)(G2leftStickY * speed2);
 
         target += incr;
 
@@ -184,8 +193,8 @@ public class DrivingPowerPlay extends OpMode {
 
         // Power motors when more than 10 ticks away from target
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
-            sliderLeft.setPower(0.5);
-            sliderRight.setPower(0.5);
+            sliderLeft.setPower(0.7);
+            sliderRight.setPower(0.7);
         } else {
             sliderLeft.setPower(0.1);
             sliderRight.setPower(0.1);
@@ -209,22 +218,28 @@ public class DrivingPowerPlay extends OpMode {
             case ARM_DROP:
                 if(gamepad2.a && !aPressed){
                     intakeArmServo.setPosition(intakeArmDropPosition);
+                    intakeArmTarget = intakeArmDropPosition;
                     armState = ArmState.ARM_INTAKE;
                     aPressed = true;
+                    intakeTimer.reset();
                 }
                 break;
             case ARM_INTAKE:
                 if(gamepad2.a && !aPressed){
                     intakeArmServo.setPosition(intakeArmPickupPosition);
+                    intakeArmTarget = intakeArmPickupPosition;
                     armState = ArmState.ARM_MID;
                     aPressed = true;
+                    intakeTimer.reset();
                 }
                 break;
             case ARM_MID:
                 if(gamepad2.a && !aPressed){
                     intakeArmServo.setPosition(intakeArmMidPosition);
+                    intakeArmTarget = intakeArmMidPosition;
                     armState = ArmState.ARM_DROP;
                     aPressed = true;
+                    intakeTimer.reset();
                 }
                 break;
             default:
@@ -249,6 +264,10 @@ public class DrivingPowerPlay extends OpMode {
             intakeWheelServo.setPower(0);
         }
 
+        if (intakeTimer.seconds() < 3 && !gamepad2.b && !gamepad2.y) {
+            intakeWheelServo.setPower(-0.15);
+        }
+
         // Turbo mode
         if (gamepad1.left_bumper && turboStop) {
             turboStop = false;
@@ -266,6 +285,8 @@ public class DrivingPowerPlay extends OpMode {
         telemetry.addData("Slider Right: ", sliderRight.getCurrentPosition());
         telemetry.addData("Arm State: ", armState);
         telemetry.addData("Arm intake servo: ", G2rightStickX);
+        telemetry.addData("Arm target pos: ", intakeArmTarget);
+        telemetry.addData("Arm pos: ", intakeArmServo.getPosition());
 
         telemetry.update();
     }
