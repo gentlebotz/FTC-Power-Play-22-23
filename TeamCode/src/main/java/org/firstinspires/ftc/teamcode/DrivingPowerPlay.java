@@ -283,6 +283,7 @@ public class DrivingPowerPlay extends OpMode {
         telemetry.addData("Limit Switch", !sliderLimitSwitch.isPressed());
         telemetry.addData("Slider Left: ", sliderLeft.getCurrentPosition());
         telemetry.addData("Slider Right: ", sliderRight.getCurrentPosition());
+        telemetry.addData("Slider target ", target);
         telemetry.addData("Arm State: ", armState);
         telemetry.addData("Arm intake servo: ", G2rightStickX);
         telemetry.addData("Arm target pos: ", intakeArmTarget);
