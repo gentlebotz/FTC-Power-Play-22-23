@@ -110,6 +110,9 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         /*
@@ -163,29 +166,40 @@ public class AutoPowerPlay extends LinearOpMode {
 
                 // Slider up, prepare outtake
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                                    sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                                     sliderRight.setPower(0.5);
                                     sliderLeft.setPower(0.5);
 
                                     sliderRight.setTargetPosition(800);
                                     sliderLeft.setTargetPosition(800);
 
-                                    intakeArmServo.setPosition(0.2);
+                                    intakeArmServo.setPosition(0);
                 })
 
-                .splineToLinearHeading(new Pose2d(-6, -29.33, Math.toRadians(45)), Math.toRadians(45)) // 45 deg hi approach
-
-                .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
-                                    intakeWheelServo.setPower(-1);
-                })
+                .lineToLinearHeading(new Pose2d(-6, -29.33, Math.toRadians(225))) // 45 deg hi approach
 
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                                    intakeWheelServo.setPower(1);
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(2, () -> {
                                     intakeWheelServo.setPower(0);
+
+                                    sliderRight.setTargetPosition(0);
+                                    sliderLeft.setTargetPosition(0);
                 })
 
                 .waitSeconds(3)
 
-                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(90))) // Reverse approach back to E3
-                .lineToLinearHeading(new Pose2d(-11.67, -11.67, Math.toRadians(-180))) // Move to D3 and rotate for cycles
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                                    sliderRight.setPower(0);
+                                    sliderLeft.setPower(0);
+                })
+
+                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(180))) // Reverse approach back to E3
+                .lineToLinearHeading(new Pose2d(-11.67, -11.67, Math.toRadians(180))) // Move to D3 and rotate for cycles
 
                 // Cycles
                 // .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Move to B3 and rotate for cycles
@@ -198,45 +212,41 @@ public class AutoPowerPlay extends LinearOpMode {
 
         TrajectorySequence trajRight = drive.trajectorySequenceBuilder(startPoseLeft)
                 // Drop preloaded cone
-                .lineToConstantHeading(new Vector2d(-19, -58.33)) // Move to F3
-                .splineToConstantHeading(new Vector2d(-11.67, -40), Math.toRadians(90)) // Move to E3
+                .lineToConstantHeading(new Vector2d(19, -58.33)) // Move to F3
+                .splineToConstantHeading(new Vector2d(11.67, -40), Math.toRadians(90)) // Move to E3
 
                 // Slider up, prepare outtake
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    sliderRight.setPower(0.5);
-                    sliderLeft.setPower(0.5);
-
-                    sliderRight.setTargetPosition(800);
-                    sliderLeft.setTargetPosition(800);
-
-                    intakeArmServo.setPosition(0);
+//                                    sliderRight.setPower(0.5);
+//                                    sliderLeft.setPower(0.5);
+//
+//                                    sliderRight.setTargetPosition(800);
+//                                    sliderLeft.setTargetPosition(800);
+//
+//                                    intakeArmServo.setPosition(0);
                 })
 
-                .splineToLinearHeading(new Pose2d(-6, -29.33, Math.toRadians(45)), Math.toRadians(45)) // 45 deg hi approach
+                .lineToLinearHeading(new Pose2d(6, -29.33, Math.toRadians(320))) // 45 deg hi approach
 
                 .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
-                    intakeWheelServo.setPower(-1);
+//                                    intakeWheelServo.setPower(-1);
                 })
 
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-                    intakeWheelServo.setPower(0);
+//                                    intakeWheelServo.setPower(0);
                 })
 
                 .waitSeconds(3)
 
-                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(90))) // Reverse approach back to E3
-                .lineToLinearHeading(new Pose2d(-11.67, -11.67, Math.toRadians(-180))) // Move to D3 and rotate for cycles
+                .lineToLinearHeading(new Pose2d(11.67, -35, Math.toRadians(0))) // Reverse approach back to E3
+                .lineToLinearHeading(new Pose2d(11.67, -11.67, Math.toRadians(0))) // Move to D3 and rotate for cycles
 
                 // Cycles
-                // .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Move to B3 and rotate for cycles
-                .lineToConstantHeading(new Vector2d(-58.33, -11.67)) // Move to cone stack D1
-                .lineToConstantHeading(new Vector2d(-35, -11.67)) // Move to D2
-                .lineToLinearHeading(new Pose2d(-29.33, -6, Math.toRadians(225))) // 45 deg hi approach
-                .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Reverse approach back to D2
-
-                // Parking
-                .waitSeconds(1)
-                .waitSeconds(1)
+                // .lineToLinearHeading(new Pose2d(35, -11.67, Math.toRadians(180))) // Move to B3 and rotate for cycles
+                .lineToConstantHeading(new Vector2d(58.33, -11.67)) // Move to cone stack D1
+                .lineToConstantHeading(new Vector2d(35, -11.67)) // Move to D2
+                .lineToLinearHeading(new Pose2d(29.33, -6, Math.toRadians(-45))) // 45 deg hi approach
+                .lineToLinearHeading(new Pose2d(35, -11.67, Math.toRadians(0))) // Reverse approach back to D2
 
                 .build();
         /*
