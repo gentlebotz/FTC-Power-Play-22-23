@@ -31,8 +31,8 @@ public class powerplayPipeline extends OpenCvPipeline {
     private double minColor;
 
     // Setup detection area bounds
-    static Point borderLeft = new Point(440,270);
-    static Point borderRight = new Point(740,680);
+    static Point borderLeft = new Point(200,100);
+    static Point borderRight = new Point(480,400);
 
     /*
     WHITE   = LEFT  (1)
@@ -69,7 +69,7 @@ public class powerplayPipeline extends OpenCvPipeline {
         minColor = Math.min(sumColors.val[0], Math.min(sumColors.val[1], sumColors.val[2]));
 
         // Decide the parking location and change border color accordingly
-        if(sumColors.val[0] == minColor) {
+        if(sumColors.val[1] == minColor) {
             location = ParkLocation.MID;
             Imgproc.rectangle(
                     input,
@@ -78,7 +78,7 @@ public class powerplayPipeline extends OpenCvPipeline {
                     CYAN,
                     2
             );
-        } else if(sumColors.val[1] == minColor){
+        } else if(sumColors.val[0] == minColor){
             location = ParkLocation.RIGHT;
             Imgproc.rectangle(
                     input,

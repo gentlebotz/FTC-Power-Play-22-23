@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorController;
@@ -18,10 +19,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //import com.qualcomm.robotcore.util.Hardware;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import static android.os.SystemClock.currentThreadTimeMillis;
 import static android.os.SystemClock.setCurrentTimeMillis;
@@ -41,9 +46,9 @@ import static android.os.SystemClock.sleep;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Forward Auto", group = "Iterative Opmode")
+@Autonomous(name = "Forward Auto", group = "AutoRR")
 //@Disabled
-public class ForwardAuto extends OpMode {
+public class ForwardAuto extends LinearOpMode {
     // Declare OpMode members.
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -74,12 +79,14 @@ public class ForwardAuto extends OpMode {
     private int maxHeight = 2300;
     private int minHeight = -10;
 
-    private enum LiftState{
+    private enum LiftState {
         LIFT_START,
         LIFT_LOW,
         LIFT_MID,
         LIFT_HIGH
-    };
+    }
+
+    ;
 
     LiftState liftState = LiftState.LIFT_START;
 
@@ -91,7 +98,7 @@ public class ForwardAuto extends OpMode {
     private double intakeArmMidPosition = 0.5;
     private double intakeArmDropPosition = 0.8;
 
-    private enum ArmState{
+    private enum ArmState {
         ARM_INTAKE,
         ARM_MID,
         ARM_DROP
@@ -99,18 +106,22 @@ public class ForwardAuto extends OpMode {
 
     private boolean aPressed = false;
 
+    private OpenCvCamera webcam;
+
+    private static final int CAMERA_WIDTH = 640; // width  of wanted camera resolution
+    private static final int CAMERA_HEIGHT = 480; // height of wanted camera resolution
+
     ArmState armState = ArmState.ARM_INTAKE;
 
-    public static double mapRange(double a1, double a2, double b1, double b2, double s){
-        return b1 + ((s - a1)*(b2 - b1))/(a2 - a1);
+    public static double mapRange(double a1, double a2, double b1, double b2, double s) {
+        return b1 + ((s - a1) * (b2 - b1)) / (a2 - a1);
     }
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
-
-    public void init() {
+    public void runOpMode() {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -121,7 +132,7 @@ public class ForwardAuto extends OpMode {
         sliderLeft = hardwareMap.get(DcMotor.class, "sliderLeft");
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
-        intakeArmServo =  hardwareMap.get(Servo.class, "intakeArmServo");
+        intakeArmServo = hardwareMap.get(Servo.class, "intakeArmServo");
         intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
 
         //  Motor Direction
@@ -136,6 +147,21 @@ public class ForwardAuto extends OpMode {
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        rightRear.setTargetPosition(0);
+        leftRear.setTargetPosition(0);
+        rightFront.setTargetPosition(0);
+        leftFront.setTargetPosition(0);
+
+        rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         telemetry.addData("Status: ", "Busy");
         telemetry.update();
 
@@ -147,7 +173,7 @@ public class ForwardAuto extends OpMode {
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
-        while(Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10){
+        while (Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10) {
             //Do nothing
         }
 
@@ -158,7 +184,34 @@ public class ForwardAuto extends OpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        while(!sliderLimitSwitch.isPressed()){
+        /*
+        Initialize EasyOpenCV
+         */
+
+        // OpenCV webcam
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        //OpenCV Pipeline
+        powerplayPipeline myPipeline;
+        webcam.setPipeline(myPipeline = new powerplayPipeline()); // Was PipeLine
+
+        // Configuration of Pipeline
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode)
+            {
+
+            }
+        });
+
+        while (!sliderLimitSwitch.isPressed() && sliderRight.getCurrentPosition() >= -400) {
             sliderLeft.setPower(-0.2);
             sliderRight.setPower(-0.2);
         }
@@ -180,42 +233,114 @@ public class ForwardAuto extends OpMode {
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
-    }
 
-    @Override
-    public void init_loop() {
-    }
+        waitForStart();
 
-    @Override
-    public void start() {}
+        if (myPipeline.error) {
+            telemetry.addData("Exception: ", myPipeline.debug);
+        }
 
-    /*
-     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-     */
-    @Override
-    public void loop() {
-        rightRear.setTargetPosition(1000);
-        leftRear.setTargetPosition(1000);
-        rightFront.setTargetPosition(1000);
-        leftFront.setTargetPosition(1000);
+        switch(myPipeline.getLocation()) {
+            case MID:
+                // Park zone 2 MID
+                rightRear.setTargetPosition(1600);
+                leftRear.setTargetPosition(1600);
+                rightFront.setTargetPosition(1600);
+                leftFront.setTargetPosition(1600);
 
-        rightRear.setPower(0.4);
-        leftRear.setPower(0.4);
-        rightFront.setPower(0.4);
-        leftFront.setPower(0.4);
+                rightRear.setPower(0.4);
+                leftRear.setPower(0.4);
+                rightFront.setPower(0.4);
+                leftFront.setPower(0.4);
 
-        // Telemetry
-        telemetry.addData("runtime", runtime);
+                while(rightRear.isBusy() || leftFront.isBusy()){
+                    //do nothing
+                }
 
-        telemetry.update();
-    }
+                break;
+            case RIGHT:
+                // Park zone 3 RIGHT
+                leftFront.setTargetPosition(1600);
+                rightFront.setTargetPosition(-1600);
+                leftRear.setTargetPosition(-1600);
+                rightRear.setTargetPosition(1600);
+
+                rightRear.setPower(0.4);
+                leftRear.setPower(0.4);
+                rightFront.setPower(0.4);
+                leftFront.setPower(0.4);
+
+                while(rightRear.isBusy() || leftFront.isBusy()){
+                    //do nothing
+                }
+
+                rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                rightRear.setPower(0);
+                leftRear.setPower(0);
+                rightFront.setPower(0);
+                leftFront.setPower(0);
+
+                rightRear.setTargetPosition(1600);
+                leftRear.setTargetPosition(1600);
+                rightFront.setTargetPosition(1600);
+                leftFront.setTargetPosition(1600);
+
+                rightRear.setPower(0.4);
+                leftRear.setPower(0.4);
+                rightFront.setPower(0.4);
+                leftFront.setPower(0.4);
+
+                while(rightRear.isBusy() || leftFront.isBusy()){
+                    //do nothing
+                }
+                break;
+            default:
+                // Park zone 1 LEFT
+                leftFront.setTargetPosition(-1600);
+                rightFront.setTargetPosition(1600);
+                leftRear.setTargetPosition(1600);
+                rightRear.setTargetPosition(-1600);
+
+                rightRear.setPower(0.4);
+                leftRear.setPower(0.4);
+                rightFront.setPower(0.4);
+                leftFront.setPower(0.4);
+
+                while(rightRear.isBusy() || leftFront.isBusy()){
+                    //do nothing
+                }
+
+                rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
-    /*
-     * Code to run ONCE after the driver hits STOP
-     */
-    @Override
-    public void stop() {
+                rightRear.setPower(0);
+                leftRear.setPower(0);
+                rightFront.setPower(0);
+                leftFront.setPower(0);
+
+                rightRear.setTargetPosition(1600);
+                leftRear.setTargetPosition(1600);
+                rightFront.setTargetPosition(1600);
+                leftFront.setTargetPosition(1600);
+
+                rightRear.setPower(0.4);
+                leftRear.setPower(0.4);
+                rightFront.setPower(0.4);
+                leftFront.setPower(0.4);
+
+                while(rightRear.isBusy() || leftFront.isBusy()){
+                    //do nothing
+                }
+                break;
+        }
+
         rightRear.setPower(0);
         leftRear.setPower(0);
         rightFront.setPower(0);

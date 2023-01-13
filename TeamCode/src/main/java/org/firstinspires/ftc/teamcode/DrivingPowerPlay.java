@@ -41,8 +41,9 @@ public class DrivingPowerPlay extends OpMode {
     private DcMotor sliderLeft = null;
     private DcMotor sliderRight = null;
     private TouchSensor sliderLimitSwitch = null;
-    private Servo intakeArmServo = null;
-    private CRServo intakeWheelServo = null;
+    private Servo intakeArmServoLeft = null;
+    private Servo intakeArmServoRight = null;
+    private Servo intakeHand = null;
 
     // Variables
     private double power = 1;
@@ -50,11 +51,14 @@ public class DrivingPowerPlay extends OpMode {
     private boolean turboStop = true;
     private boolean turbo = false;
 
+    private boolean handClosed;
+    private boolean xPressed;
+
     private int target = 0;
     private int speed2 = 120;
     private int current;
     private int incr;
-    private int maxHeight = 2500;
+    private int maxHeight = 6000;
     private int minHeight = -10;
 
     private ElapsedTime intakeTimer = new ElapsedTime();
@@ -72,14 +76,18 @@ public class DrivingPowerPlay extends OpMode {
     private int midPole = 0;
     private int highPole = 0;
 
-    private double intakeArmPickupPosition = 0.2;
+    private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
-    private double intakeArmDropPosition = 1;
+    private double intakeArmDropPosition = 0.1;
     private double intakeArmTarget = 0.1;
+
+    private double handOpenPos = 1;
+    private double handClosedPos = 0;
 
     private enum ArmState{
         ARM_INTAKE,
-        ARM_MID,
+        ARM_MID_TO_DROP,
+        ARM_MID_TO_INTAKE,
         ARM_DROP
     }
 
@@ -107,8 +115,9 @@ public class DrivingPowerPlay extends OpMode {
         sliderLeft = hardwareMap.get(DcMotor.class, "sliderLeft");
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
-        intakeArmServo =  hardwareMap.get(Servo.class, "intakeArmServo");
-        intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
+        intakeArmServoLeft =  hardwareMap.get(Servo.class, "intakeArmServoL");
+        intakeArmServoRight = hardwareMap.get(Servo.class, "intakeArmServoR");
+        intakeHand = hardwareMap.get(Servo.class, "intakeHand");
 
         //  Motor Direction
         rightRear.setDirection(DcMotor.Direction.FORWARD);
@@ -117,6 +126,7 @@ public class DrivingPowerPlay extends OpMode {
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
         sliderRight.setDirection(DcMotor.Direction.REVERSE);
+        intakeArmServoRight.setDirection(Servo.Direction.REVERSE);
 
         //Encoders
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -130,6 +140,8 @@ public class DrivingPowerPlay extends OpMode {
 
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //intakeArmServoL.setPosition(0.9);
 
         intakeTimer.startTime();
         intakeTimer.reset();
@@ -191,10 +203,10 @@ public class DrivingPowerPlay extends OpMode {
         sliderLeft.setTargetPosition(target);
         sliderRight.setTargetPosition(target);
 
-        // Power motors when more than 10 ticks away from target
+        // Power motors when more than 10 encoder ticks away from target
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
-            sliderLeft.setPower(0.7);
-            sliderRight.setPower(0.7);
+            sliderLeft.setPower(0.6);
+            sliderRight.setPower(0.6);
         } else {
             sliderLeft.setPower(0.1);
             sliderRight.setPower(0.1);
@@ -217,8 +229,19 @@ public class DrivingPowerPlay extends OpMode {
         switch(armState){
             case ARM_DROP:
                 if(gamepad2.a && !aPressed){
-                    intakeArmServo.setPosition(intakeArmDropPosition);
+                    intakeArmServoLeft.setPosition(intakeArmDropPosition);
+                    intakeArmServoRight.setPosition(intakeArmDropPosition);
                     intakeArmTarget = intakeArmDropPosition;
+                    armState = ArmState.ARM_MID_TO_INTAKE;
+                    aPressed = true;
+                    intakeTimer.reset();
+                }
+                break;
+            case ARM_MID_TO_INTAKE:
+                if(gamepad2.a && !aPressed){
+                    intakeArmServoLeft.setPosition(intakeArmMidPosition);
+                    intakeArmServoRight.setPosition(intakeArmMidPosition);
+                    intakeArmTarget = intakeArmMidPosition;
                     armState = ArmState.ARM_INTAKE;
                     aPressed = true;
                     intakeTimer.reset();
@@ -226,16 +249,18 @@ public class DrivingPowerPlay extends OpMode {
                 break;
             case ARM_INTAKE:
                 if(gamepad2.a && !aPressed){
-                    intakeArmServo.setPosition(intakeArmPickupPosition);
+                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
+                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
                     intakeArmTarget = intakeArmPickupPosition;
-                    armState = ArmState.ARM_MID;
+                    armState = ArmState.ARM_MID_TO_DROP;
                     aPressed = true;
                     intakeTimer.reset();
                 }
                 break;
-            case ARM_MID:
+            case ARM_MID_TO_DROP:
                 if(gamepad2.a && !aPressed){
-                    intakeArmServo.setPosition(intakeArmMidPosition);
+                    intakeArmServoLeft.setPosition(intakeArmMidPosition);
+                    intakeArmServoRight.setPosition(intakeArmMidPosition);
                     intakeArmTarget = intakeArmMidPosition;
                     armState = ArmState.ARM_DROP;
                     aPressed = true;
@@ -250,22 +275,19 @@ public class DrivingPowerPlay extends OpMode {
             aPressed = false;
         }
 
+        if(gamepad2.x && !xPressed) {
+            xPressed = true;
+            handClosed = !handClosed;
+            intakeHand.setPosition(handClosed ? handOpenPos : handClosedPos);
+        }
+
+        if(!gamepad2.x) {
+            xPressed = false;
+        }
+
         // Reset intake position
         if (gamepad1.x && armState != armState.ARM_DROP) {
             armState = ArmState.ARM_DROP;
-        }
-
-        // Intake wheels control
-        if(gamepad2.b){
-            intakeWheelServo.setPower(1);
-        } else if(gamepad2.y){
-            intakeWheelServo.setPower(-1);
-        } else {
-            intakeWheelServo.setPower(0);
-        }
-
-        if (intakeTimer.seconds() < 3 && !gamepad2.b && !gamepad2.y) {
-            intakeWheelServo.setPower(-0.15);
         }
 
         // Turbo mode
@@ -287,7 +309,7 @@ public class DrivingPowerPlay extends OpMode {
         telemetry.addData("Arm State: ", armState);
         telemetry.addData("Arm intake servo: ", G2rightStickX);
         telemetry.addData("Arm target pos: ", intakeArmTarget);
-        telemetry.addData("Arm pos: ", intakeArmServo.getPosition());
+        telemetry.addData("Arm hand pos: ", intakeHand.getPosition());
 
         telemetry.update();
     }
@@ -304,7 +326,6 @@ public class DrivingPowerPlay extends OpMode {
         leftFront.setPower(0);
         sliderLeft.setPower(0);
         sliderRight.setPower(0);
-        intakeWheelServo.setPower(0);
     }
 
 }
