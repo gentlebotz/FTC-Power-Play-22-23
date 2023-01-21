@@ -47,15 +47,19 @@ public class DrivingPowerPlay extends OpMode {
 
     // Variables
     private double power = 1;
-    private double power2 = .4;
+    private double driveSpeed = .5;
+    private double drivePower = .5;
+    private double turboPower = 1;
     private boolean turboStop = true;
     private boolean turbo = false;
 
     private boolean handClosed;
     private boolean xPressed;
+    private boolean yPressed;
 
+    // Lift variables
     private int target = 0;
-    private int speed2 = 120;
+    private int sliderSpeed = 120;
     private int current;
     private int incr;
     private int maxHeight = 6000;
@@ -79,10 +83,9 @@ public class DrivingPowerPlay extends OpMode {
     private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
     private double intakeArmDropPosition = 0.1;
-    private double intakeArmTarget = 0.1;
 
-    private double handOpenPos = 1;
-    private double handClosedPos = 0;
+    private double handOpenPos = .8;
+    private double handClosedPos = 0.2;
 
     private enum ArmState{
         ARM_INTAKE,
@@ -93,7 +96,7 @@ public class DrivingPowerPlay extends OpMode {
 
     private boolean aPressed = false;
 
-    ArmState armState = ArmState.ARM_INTAKE;
+    ArmState armState = ArmState.ARM_MID_TO_DROP;
 
     public static double mapRange(double a1, double a2, double b1, double b2, double s){
         return b1 + ((s - a1)*(b2 - b1))/(a2 - a1);
@@ -171,16 +174,16 @@ public class DrivingPowerPlay extends OpMode {
         double G2leftStickY = -gamepad2.left_stick_y;
 
         // Holonomic wheel movement
-        rightRear.setPower(power2 * (G1leftStickY + -G1leftStickX + 1.2 * -G1rightStickX));
-        leftRear.setPower(power2 * (G1leftStickY + G1leftStickX + 1.2 * G1rightStickX));
-        rightFront.setPower(power2 * (G1leftStickY + G1leftStickX + 1.2 * -G1rightStickX));
-        leftFront.setPower(power2 * (G1leftStickY + -G1leftStickX + 1.2 * G1rightStickX));
+        rightRear.setPower(driveSpeed * (G1leftStickY + -G1leftStickX + 1.2 * -G1rightStickX));
+        leftRear.setPower(driveSpeed * (G1leftStickY + G1leftStickX + 1.2 * G1rightStickX));
+        rightFront.setPower(driveSpeed * (G1leftStickY + G1leftStickX + 1.2 * -G1rightStickX));
+        leftFront.setPower(driveSpeed * (G1leftStickY + -G1leftStickX + 1.2 * G1rightStickX));
 
         // Update lift target
         current =  sliderLeft.getCurrentPosition();
 
         int current = sliderLeft.getCurrentPosition();
-        int incr = (int)(G2leftStickY * speed2);
+        int incr = (int)(G2leftStickY * sliderSpeed);
 
         target += incr;
 
@@ -195,9 +198,9 @@ public class DrivingPowerPlay extends OpMode {
             target = minHeight;
         }
 
-        if(Math.abs(target-current) > speed2)
+        if(Math.abs(target-current) > sliderSpeed)
         {
-            target = current + (int)Math.signum(target-current)*speed2;
+            target = current + (int)Math.signum(target-current)*sliderSpeed;
         }
 
         sliderLeft.setTargetPosition(target);
@@ -231,7 +234,6 @@ public class DrivingPowerPlay extends OpMode {
                 if(gamepad2.a && !aPressed){
                     intakeArmServoLeft.setPosition(intakeArmDropPosition);
                     intakeArmServoRight.setPosition(intakeArmDropPosition);
-                    intakeArmTarget = intakeArmDropPosition;
                     armState = ArmState.ARM_MID_TO_INTAKE;
                     aPressed = true;
                     intakeTimer.reset();
@@ -241,7 +243,7 @@ public class DrivingPowerPlay extends OpMode {
                 if(gamepad2.a && !aPressed){
                     intakeArmServoLeft.setPosition(intakeArmMidPosition);
                     intakeArmServoRight.setPosition(intakeArmMidPosition);
-                    intakeArmTarget = intakeArmMidPosition;
+                    intakeHand.setPosition(handClosedPos);
                     armState = ArmState.ARM_INTAKE;
                     aPressed = true;
                     intakeTimer.reset();
@@ -251,7 +253,6 @@ public class DrivingPowerPlay extends OpMode {
                 if(gamepad2.a && !aPressed){
                     intakeArmServoLeft.setPosition(intakeArmPickupPosition);
                     intakeArmServoRight.setPosition(intakeArmPickupPosition);
-                    intakeArmTarget = intakeArmPickupPosition;
                     armState = ArmState.ARM_MID_TO_DROP;
                     aPressed = true;
                     intakeTimer.reset();
@@ -261,7 +262,7 @@ public class DrivingPowerPlay extends OpMode {
                 if(gamepad2.a && !aPressed){
                     intakeArmServoLeft.setPosition(intakeArmMidPosition);
                     intakeArmServoRight.setPosition(intakeArmMidPosition);
-                    intakeArmTarget = intakeArmMidPosition;
+                    intakeHand.setPosition(handClosedPos);
                     armState = ArmState.ARM_DROP;
                     aPressed = true;
                     intakeTimer.reset();
@@ -286,15 +287,20 @@ public class DrivingPowerPlay extends OpMode {
         }
 
         // Reset intake position
-        if (gamepad1.x && armState != armState.ARM_DROP) {
+        if (gamepad1.y && !yPressed && armState != armState.ARM_DROP) {
             armState = ArmState.ARM_DROP;
+            yPressed = true;
+        }
+
+        if(!gamepad2.y) {
+            yPressed = false;
         }
 
         // Turbo mode
         if (gamepad1.left_bumper && turboStop) {
             turboStop = false;
             turbo = !turbo;
-            power2 = turbo ? 1 : 0.5;
+            driveSpeed = turbo ? turboPower : drivePower;
         } else if (!gamepad1.left_bumper) {
             turboStop = true;
         }
@@ -307,9 +313,7 @@ public class DrivingPowerPlay extends OpMode {
         telemetry.addData("Slider Right: ", sliderRight.getCurrentPosition());
         telemetry.addData("Slider target ", target);
         telemetry.addData("Arm State: ", armState);
-        telemetry.addData("Arm intake servo: ", G2rightStickX);
-        telemetry.addData("Arm target pos: ", intakeArmTarget);
-        telemetry.addData("Arm hand pos: ", intakeHand.getPosition());
+        //telemetry.addData("Arm hand pos: ", intakeHand.getPosition());
 
         telemetry.update();
     }
