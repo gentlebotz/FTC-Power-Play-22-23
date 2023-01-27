@@ -59,7 +59,7 @@ public class DrivingPowerPlay extends OpMode {
 
     // Lift variables
     private int target = 0;
-    private int sliderSpeed = 120;
+    private int sliderSpeed = 180;
     private int current;
     private int incr;
     private int maxHeight = 6000;
@@ -85,7 +85,7 @@ public class DrivingPowerPlay extends OpMode {
     private double intakeArmDropPosition = 0.1;
 
     private double handOpenPos = .8;
-    private double handClosedPos = 0.2;
+    private double handClosedPos = 0.1;
 
     private enum ArmState{
         ARM_INTAKE,
@@ -210,7 +210,12 @@ public class DrivingPowerPlay extends OpMode {
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
             sliderLeft.setPower(0.6);
             sliderRight.setPower(0.6);
-        } else {
+        }
+//        if(sliderLeft.getCurrentPosition() < 50 || sliderRight.getCurrentPosition() < 50){
+//            sliderRight.setPower(0);
+//            sliderLeft.setPower(0);
+//        }
+        else {
             sliderLeft.setPower(0.1);
             sliderRight.setPower(0.1);
         }
@@ -244,6 +249,7 @@ public class DrivingPowerPlay extends OpMode {
                     intakeArmServoLeft.setPosition(intakeArmMidPosition);
                     intakeArmServoRight.setPosition(intakeArmMidPosition);
                     intakeHand.setPosition(handClosedPos);
+                    handClosed = false;
                     armState = ArmState.ARM_INTAKE;
                     aPressed = true;
                     intakeTimer.reset();
@@ -263,6 +269,7 @@ public class DrivingPowerPlay extends OpMode {
                     intakeArmServoLeft.setPosition(intakeArmMidPosition);
                     intakeArmServoRight.setPosition(intakeArmMidPosition);
                     intakeHand.setPosition(handClosedPos);
+                    handClosed = false;
                     armState = ArmState.ARM_DROP;
                     aPressed = true;
                     intakeTimer.reset();

@@ -35,20 +35,28 @@ public class AutoPowerPlay extends LinearOpMode {
     private DcMotor sliderLeft = null;
     private DcMotor sliderRight = null;
     private TouchSensor sliderLimitSwitch = null;
-    private Servo intakeArmServo = null;
-    private CRServo intakeWheelServo = null;
+    private Servo intakeArmServoLeft = null;
+    private Servo intakeArmServoRight = null;
+    private Servo intakeHand = null;
 
     // Variables
     private double power = 1;
-    private double power2 = .4;
+    private double driveSpeed = .5;
+    private double drivePower = .5;
+    private double turboPower = 1;
     private boolean turboStop = true;
     private boolean turbo = false;
 
+    private boolean handClosed;
+    private boolean xPressed;
+    private boolean yPressed;
+
+    // Lift variables
     private int target = 0;
-    private int speed2 = 120;
+    private int sliderSpeed = 180;
     private int current;
     private int incr;
-    private int maxHeight = 2400;
+    private int maxHeight = 6000;
     private int minHeight = -10;
 
     private enum LiftState{
@@ -64,17 +72,23 @@ public class AutoPowerPlay extends LinearOpMode {
     private int midPole = 0;
     private int highPole = 0;
 
-    private double intakeArmPickupPosition = 0;
-    private double intakeArmMidPostition = 0.5;
-    private double intakeArmDropPosition = 1;
+    private double intakeArmPickupPosition = 0.8;
+    private double intakeArmMidPosition = 0.5;
+    private double intakeArmDropPosition = 0.1;
+
+    private double handOpenPos = .8;
+    private double handClosedPos = 0.1;
 
     private enum ArmState{
         ARM_INTAKE,
-        ARM_MID,
+        ARM_MID_TO_DROP,
+        ARM_MID_TO_INTAKE,
         ARM_DROP
     }
 
-    ArmState armState = ArmState.ARM_INTAKE;
+    private boolean aPressed = false;
+
+    ArmState armState = ArmState.ARM_MID_TO_DROP;
 
 
     public static double mapRange(double a1, double a2, double b1, double b2, double s){
@@ -96,25 +110,29 @@ public class AutoPowerPlay extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
+        rightRear = hardwareMap.get(DcMotor.class, "rightRear");
+        leftRear = hardwareMap.get(DcMotor.class, "leftRear");
+        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         sliderLeft = hardwareMap.get(DcMotor.class, "sliderLeft");
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
-        intakeArmServo =  hardwareMap.get(Servo.class, "intakeArmServo");
-        intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
+        intakeArmServoLeft =  hardwareMap.get(Servo.class, "intakeArmServoL");
+        intakeArmServoRight = hardwareMap.get(Servo.class, "intakeArmServoR");
+        intakeHand = hardwareMap.get(Servo.class, "intakeHand");
 
         //  Motor Direction
+        rightRear.setDirection(DcMotor.Direction.FORWARD);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
         sliderRight.setDirection(DcMotor.Direction.REVERSE);
+        intakeArmServoRight.setDirection(Servo.Direction.REVERSE);
 
         //Encoders
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        sliderLeft.setTargetPosition(0);
-        sliderRight.setTargetPosition(0);
-
-        sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
@@ -178,17 +196,17 @@ public class AutoPowerPlay extends LinearOpMode {
                                     sliderRight.setTargetPosition(800);
                                     sliderLeft.setTargetPosition(800);
 
-                                    intakeArmServo.setPosition(0);
+                                    //intakeArmServoLeft.setPosition(intakeArmDropPosition);
                 })
 
                 .lineToLinearHeading(new Pose2d(-6, -29.33, Math.toRadians(225))) // 45 deg hi approach
 
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-                                    intakeWheelServo.setPower(1);
+                                    //intakeWheelServo.setPower(1);
                 })
 
                 .UNSTABLE_addTemporalMarkerOffset(2, () -> {
-                                    intakeWheelServo.setPower(0);
+                                    //intakeWheelServo.setPower(0);
 
                                     sliderRight.setTargetPosition(0);
                                     sliderLeft.setTargetPosition(0);
@@ -327,7 +345,7 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        intakeArmServo.setPosition(intakeArmMidPostition);
+        //intakeArmServo.setPosition(intakeArmMidPostition);
 
         telemetry.addData("Status: ", "Initialized");
         telemetry.update();
