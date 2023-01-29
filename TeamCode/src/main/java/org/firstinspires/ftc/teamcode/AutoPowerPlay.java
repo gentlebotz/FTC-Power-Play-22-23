@@ -69,8 +69,8 @@ public class AutoPowerPlay extends LinearOpMode {
     LiftState liftState = LiftState.LIFT_START;
 
     private int lowPole = 0;
-    private int midPole = 0;
-    private int highPole = 0;
+    private int midPole = 2750;
+    private int highPole = 5800;
 
     private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
