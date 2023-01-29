@@ -90,7 +90,6 @@ public class AutoPowerPlay extends LinearOpMode {
 
     ArmState armState = ArmState.ARM_MID_TO_DROP;
 
-
     public static double mapRange(double a1, double a2, double b1, double b2, double s){
         return b1 + ((s - a1)*(b2 - b1))/(a2 - a1);
     }
@@ -143,6 +142,7 @@ public class AutoPowerPlay extends LinearOpMode {
         // OpenCV webcam
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
         //OpenCV Pipeline
         powerplayPipeline myPipeline;
         webcam.setPipeline(myPipeline = new powerplayPipeline()); // Was PipeLine
@@ -315,13 +315,13 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
         while(Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10){
-            //Do nothing
+            // Move slider up until reaching target
         }
 
-        // Move slider down until it reaches limit switch
-        sliderRight.setPower(0.2);
-        sliderLeft.setPower(0.2);
+        sliderRight.setPower(0);
+        sliderLeft.setPower(0);
 
+        // Move slider down until it reaches limit switch
         sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -345,7 +345,7 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        //intakeArmServo.setPosition(intakeArmMidPostition);
+        //intakeArmServo.setPosition(intakeArmMidPosition);
 
         telemetry.addData("Status: ", "Initialized");
         telemetry.update();
@@ -380,15 +380,18 @@ public class AutoPowerPlay extends LinearOpMode {
             if (!isStopRequested()) {
                 if (StartLeft) {
                     drive.followTrajectorySequence(trajLeft);
+
                     switch(myPipeline.getLocation()) {
                         case MID:
                             // Park zone 2 MID
                             drive.followTrajectorySequence(parkLeft1);
                             break;
+
                         case RIGHT:
                             // Park zone 3 RIGHT
                             drive.followTrajectorySequence(parkLeft2);
                             break;
+
                         default:
                             // Park zone 1 LEFT
                             drive.followTrajectorySequence(parkLeft3);
@@ -396,15 +399,18 @@ public class AutoPowerPlay extends LinearOpMode {
                     }
                 } else {
                     drive.followTrajectorySequence(trajRight);
+
                     switch(myPipeline.getLocation()) {
                         case MID:
                             // Park zone 1
                             drive.followTrajectorySequence(parkRight1);
                             break;
+
                         case RIGHT:
                             // Park zone 2
                             drive.followTrajectorySequence(parkRight2);
                             break;
+
                         default:
                             // Park zone 3
                             drive.followTrajectorySequence(parkRight3);
@@ -413,14 +419,12 @@ public class AutoPowerPlay extends LinearOpMode {
                 }
             }
 
-
             }
             sliderLeft.setTargetPosition(0);
             sliderRight.setTargetPosition(0);
             sliderLeft.setPower(0.25);
             sliderRight.setPower(0.25);
-            while (opModeIsActive() && Math.abs(0 - sliderLeft.getCurrentPosition()) >= 4) {
-            }
+            while (opModeIsActive() && Math.abs(0 - sliderLeft.getCurrentPosition()) >= 4) {}
             sliderLeft.setPower(0);
             sliderRight.setPower(0);
         }

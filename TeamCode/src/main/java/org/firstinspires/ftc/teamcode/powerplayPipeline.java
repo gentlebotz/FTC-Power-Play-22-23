@@ -23,7 +23,6 @@ public class powerplayPipeline extends OpenCvPipeline {
     private final Scalar YELLOW = new Scalar(225, 225, 0);
     private Scalar sumColors;
 
-
     private Mat ycrcbMat        = new Mat();
     private Mat areaMat         = new Mat();
     private Mat maskedInputMat  = new Mat();

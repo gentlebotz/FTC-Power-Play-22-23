@@ -86,8 +86,6 @@ public class ForwardAuto extends LinearOpMode {
         LIFT_HIGH
     }
 
-    ;
-
     LiftState liftState = LiftState.LIFT_START;
 
     private int lowPole = 0;
@@ -122,9 +120,7 @@ public class ForwardAuto extends LinearOpMode {
      */
     @Override
     public void runOpMode() {
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
+        // Initialize hardware variables (names must correspond to robot configuration on robot controller app)
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
@@ -135,7 +131,7 @@ public class ForwardAuto extends LinearOpMode {
         intakeArmServo = hardwareMap.get(Servo.class, "intakeArmServo");
         intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
 
-        //  Motor Direction
+        // Motor Direction
         rightRear.setDirection(DcMotor.Direction.FORWARD);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
@@ -143,7 +139,7 @@ public class ForwardAuto extends LinearOpMode {
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
         sliderRight.setDirection(DcMotor.Direction.REVERSE);
 
-        //Encoders
+        // Set encoder mode
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -174,44 +170,17 @@ public class ForwardAuto extends LinearOpMode {
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
         while (Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10) {
-            //Do nothing
+            // Keep moving up until reaching target
         }
 
-        // Move slider down until it reaches limit switch
-        sliderRight.setPower(0.2);
-        sliderLeft.setPower(0.2);
+        sliderRight.setPower(0);
+        sliderLeft.setPower(0);
 
+        // Move slider down until it reaches limit switch
         sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        /*
-        Initialize EasyOpenCV
-         */
-
-        // OpenCV webcam
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        //OpenCV Pipeline
-        powerplayPipeline myPipeline;
-        webcam.setPipeline(myPipeline = new powerplayPipeline()); // Was PipeLine
-
-        // Configuration of Pipeline
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode)
-            {
-
-            }
-        });
-
-        while (!sliderLimitSwitch.isPressed() && sliderRight.getCurrentPosition() >= -400) {
+        while (!sliderLimitSwitch.isPressed() && sliderLeft.getCurrentPosition() >= -400) {
             sliderLeft.setPower(-0.2);
             sliderRight.setPower(-0.2);
         }
@@ -230,6 +199,34 @@ public class ForwardAuto extends LinearOpMode {
 
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        /*
+        Initialize EasyOpenCV
+         */
+
+        // OpenCV webcam
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        // OpenCV Pipeline
+        powerplayPipeline myPipeline;
+        webcam.setPipeline(myPipeline = new powerplayPipeline()); // Was PipeLine
+
+        // Configuration of Pipeline
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode)
+            {
+                // Ignore error and hope it works
+            }
+        });
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
@@ -254,7 +251,7 @@ public class ForwardAuto extends LinearOpMode {
                 leftFront.setPower(0.4);
 
                 while(rightRear.isBusy() || leftFront.isBusy()){
-                    //do nothing
+                    // Do nothing
                 }
 
                 break;
@@ -271,7 +268,7 @@ public class ForwardAuto extends LinearOpMode {
                 leftFront.setPower(0.4);
 
                 while(rightRear.isBusy() || leftFront.isBusy()){
-                    //do nothing
+                    // Do nothing
                 }
 
                 rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -295,7 +292,7 @@ public class ForwardAuto extends LinearOpMode {
                 leftFront.setPower(0.4);
 
                 while(rightRear.isBusy() || leftFront.isBusy()){
-                    //do nothing
+                    // Do nothing
                 }
                 break;
             default:
@@ -311,7 +308,7 @@ public class ForwardAuto extends LinearOpMode {
                 leftFront.setPower(0.4);
 
                 while(rightRear.isBusy() || leftFront.isBusy()){
-                    //do nothing
+                    // Do nothing
                 }
 
                 rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -336,7 +333,7 @@ public class ForwardAuto extends LinearOpMode {
                 leftFront.setPower(0.4);
 
                 while(rightRear.isBusy() || leftFront.isBusy()){
-                    //do nothing
+                    // Do nothing
                 }
                 break;
         }

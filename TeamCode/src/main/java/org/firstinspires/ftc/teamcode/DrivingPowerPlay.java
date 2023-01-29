@@ -57,7 +57,7 @@ public class DrivingPowerPlay extends OpMode {
     private boolean xPressed;
     private boolean yPressed;
 
-    // Lift variables
+    // Slider, Intake variables
     private int target = 0;
     private int sliderSpeed = 180;
     private int current;
@@ -94,9 +94,9 @@ public class DrivingPowerPlay extends OpMode {
         ARM_DROP
     }
 
-    private boolean aPressed = false;
-
     ArmState armState = ArmState.ARM_MID_TO_DROP;
+
+    private boolean aPressed = false;
 
     public static double mapRange(double a1, double a2, double b1, double b2, double s){
         return b1 + ((s - a1)*(b2 - b1))/(a2 - a1);

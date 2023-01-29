@@ -147,13 +147,13 @@ public class SliderTest extends OpMode {
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
         while(Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10){
-            //Do nothing
+            // Keep moving up until reaching target
         }
 
-        // Move slider down until it reaches limit switch
-        sliderRight.setPower(0.2);
-        sliderLeft.setPower(0.2);
+        sliderRight.setPower(0);
+        sliderLeft.setPower(0);
 
+        // Move slider down until it reaches limit switch
         sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -206,10 +206,9 @@ public class SliderTest extends OpMode {
         leftFront.setPower(power2 * (G1leftStickY + -G1leftStickX + 1.2 * G1rightStickX));
 
         // Update lift target
-        current =  sliderLeft.getCurrentPosition();
 
-        int current = sliderLeft.getCurrentPosition();
-        int incr = (int)(-gamepad2.left_stick_y * speed2);
+        current = sliderLeft.getCurrentPosition();
+        incr = (int)(-gamepad2.left_stick_y * speed2);
 
         target += incr;
 
@@ -236,9 +235,7 @@ public class SliderTest extends OpMode {
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
             sliderLeft.setPower(0.4);
             sliderRight.setPower(0.4);
-        }
-
-        else{
+        } else {
             sliderLeft.setPower(0);
             sliderRight.setPower(0);
         }

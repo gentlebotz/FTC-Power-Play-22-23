@@ -8,6 +8,7 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 import java.util.Vector;
 
+// Used to visualize & plan autonomous trajectories before testing on robot
 public class MeepMeepTesting {
 
     private static float junctionOffset = 6;
