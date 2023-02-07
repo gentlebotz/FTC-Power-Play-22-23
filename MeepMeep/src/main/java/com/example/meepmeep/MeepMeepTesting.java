@@ -35,51 +35,125 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-35, -58.33, Math.toRadians(270))) //Red F2 Starting position
+                        drive.trajectorySequenceBuilder(new Pose2d(-35, -61.25, Math.toRadians(90))) //Red F2 Starting position
 
                                 // Drop preloaded cone
-                                .lineToConstantHeading(new Vector2d(-19, -58.33)) // Move to F3
-                                .splineToConstantHeading(new Vector2d(-11.67, -40), Math.toRadians(90)) // Move to E3
+                                // Sliders up
+                                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+//                                    sliderRight.setPower(0.4);
+//                                    sliderLeft.setPower(0.4);
+//
+//                                    sliderRight.setTargetPosition(highPole);
+//                                    sliderLeft.setTargetPosition(highPole);
+                                })
+
+                                .lineToConstantHeading(new Vector2d(-18.6, -58.33)) // Move to F3
+                                .splineToConstantHeading(new Vector2d(-13, -40), Math.toRadians(90)) // Move to E3
 
                                 // Slider up, prepare outtake
                                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                                    sliderRight.setPower(0.5);
-//                                    sliderLeft.setPower(0.5);
-//
-//                                    sliderRight.setTargetPosition(800);
-//                                    sliderLeft.setTargetPosition(800);
-//
-//                                    intakeArmServo.setPosition(0);
+//                                    intakeArmServoLeft.setPosition(0.2);
+//                                    intakeArmServoRight.setPosition(0.2);
                                 })
 
-                                .lineToLinearHeading(new Pose2d(-6, -29.33, Math.toRadians(225))) // 45 deg hi approach
+                                .waitSeconds(.4)
 
-                                .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
-//                                    intakeWheelServo.setPower(-1);
-                                })
+                                .lineToLinearHeading(new Pose2d(-4, -27.33, Math.toRadians(45))) // 45 deg hi approach
 
+                                // Drop cone
                                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-//                                    intakeWheelServo.setPower(0);
+//                                    intakeHand.setPosition(handOpenPos)
                                 })
 
                                 .waitSeconds(3)
 
-                                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(180))) // Reverse approach back to E3
-                                .lineToLinearHeading(new Pose2d(-11.67, -11.67, Math.toRadians(180))) // Move to D3 and rotate for cycles
+                                // Sliders down
+                                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+//                                    sliderRight.setPower(0.4);
+//                                    sliderLeft.setPower(0.4);
+//
+//                                    sliderRight.setTargetPosition(lowPole);
+//                                    sliderLeft.setTargetPosition(lowPole);
+                                })
+
+                                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(90))) // Reverse approach back to E3
+                                .lineToConstantHeading(new Vector2d(-11.67, -12.2)) // Move to D3 and rotate for cycles
 
                                 // Cycles
                                 // .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Move to B3 and rotate for cycles
-                                .lineToConstantHeading(new Vector2d(-58.33, -11.67)) // Move to cone stack D1
-                                .lineToConstantHeading(new Vector2d(-35, -11.67)) // Move to D2
+                                .turn(Math.toRadians(90))
+
+                                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+//                                    intakeArmServoLeft.setPosition(intakeArmPos);
+//                                    intakeArmServoRight.setPosition(intakeArmPos);
+                                })
+
+                                .lineToConstantHeading(new Vector2d(-58.33, -12.2)) // Move to cone stack D1
+
+                                .UNSTABLE_addTemporalMarkerOffset(0.35, () -> {
+//                                    sliderRight.setPower(0.2);
+//                                    sliderLeft.setPower(0.2);
+//
+//                                    sliderRight.setTargetPosition(lowPole - 100);
+//                                    sliderLeft.setTargetPosition(lowPole - 100);
+                                })
+
+                                .UNSTABLE_addTemporalMarkerOffset(1.25, () -> {
+//                                    intakeHand.setPosition(handClosedPos)
+//                                    sliderRight.setTargetPosition(lowPole + 200);
+////                                  sliderLeft.setTargetPosition(lowPole + 200);
+                                })
+
+                                .waitSeconds(2)
+
+                                .UNSTABLE_addTemporalMarkerOffset(0.1, () -> {
+//                                    sliderRight.setPower(0.4);
+//                                    sliderLeft.setPower(0.4);
+//
+//                                    sliderRight.setTargetPosition(highPole);
+//                                    sliderLeft.setTargetPosition(highPole);
+                                })
+
+                                .lineToConstantHeading(new Vector2d(-35, -12.2)) // Move to D2
                                 .lineToLinearHeading(new Pose2d(-29.33, -6, Math.toRadians(225))) // 45 deg hi approach
-                                .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Reverse approach back to D2
+
+                                // Drop cone
+                                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+//                                    intakeHand.setPosition(handOpenPos)
+                                })
+
+                                .waitSeconds(2)
+
+                                // Sliders down
+                                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+//                                    sliderRight.setPower(0.4);
+//                                    sliderLeft.setPower(0.4);
+//
+//                                    sliderRight.setTargetPosition(lowPole);
+//                                    sliderLeft.setTargetPosition(lowPole);
+                                })
+
+                                .lineToLinearHeading(new Pose2d(-35, -12.2, Math.toRadians(-180))) // Reverse approach back to D2
+
+                                // Sliders down and setup for driver-controlled
+                                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+//                                    sliderRight.setPower(0.4);
+//                                    sliderLeft.setPower(0.4);
+//
+//                                    sliderRight.setTargetPosition(0);
+//                                    sliderLeft.setTargetPosition(0);
+//
+//                                    intakeArmServoLeft.setPosition(intakeArmPos);
+//                                    intakeArmServoRight.setPosition(intakeArmPos);
+//                                    intakeHand.setPosition(handOpenPos)
+                                })
 
                                 // Parking
-                                .lineToConstantHeading(new Vector2d(-58.33, -11.67)) // Location 1
+                                .lineToConstantHeading(new Vector2d(-58.33, -12.2)) // Location 1
                                 .waitSeconds(1)
-                                .lineToConstantHeading(new Vector2d(-35, -11.67)) // Location 2
+                                .lineToConstantHeading(new Vector2d(-35, -12.2)) // Location 2
                                 .waitSeconds(1)
-                                .lineToConstantHeading(new Vector2d(-11.67, -11.67)) // Location 3
+                                .lineToConstantHeading(new Vector2d(-11.67, -12.2)) // Location 3
 
                                 .build()
                 );
