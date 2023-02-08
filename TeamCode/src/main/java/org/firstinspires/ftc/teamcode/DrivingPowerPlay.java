@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -59,11 +60,13 @@ public class DrivingPowerPlay extends OpMode {
 
     // Slider, Intake variables
     private int target = 0;
-    private int sliderSpeed = 180;
+    private int sliderSpeed = 200;
     private int current;
     private int incr;
     private int maxHeight = 6000;
     private int minHeight = -10;
+    private boolean sliderLimits = true;
+    private boolean limitsPressed = false;
 
     private ElapsedTime intakeTimer = new ElapsedTime();
 
@@ -82,9 +85,9 @@ public class DrivingPowerPlay extends OpMode {
 
     private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
-    private double intakeArmDropPosition = 0.1;
+    private double intakeArmDropPosition = 0;
 
-    private double handOpenPos = .8;
+    private double handOpenPos = 0.29;
     private double handClosedPos = 0.1;
 
     private enum ArmState{
@@ -122,9 +125,15 @@ public class DrivingPowerPlay extends OpMode {
         intakeArmServoRight = hardwareMap.get(Servo.class, "intakeArmServoR");
         intakeHand = hardwareMap.get(Servo.class, "intakeHand");
 
+<<<<<<< Updated upstream
         // Set motor direction
         rightRear.setDirection(DcMotor.Direction.FORWARD);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
+=======
+        //  Motor Direction
+        rightRear.setDirection(DcMotor.Direction.REVERSE);
+        leftRear.setDirection(DcMotor.Direction.FORWARD);
+>>>>>>> Stashed changes
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -140,9 +149,16 @@ public class DrivingPowerPlay extends OpMode {
 
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+<<<<<<< Updated upstream
 
         intakeArmServoLeft.setPosition(intakeArmPickupPosition);
         intakeArmServoRight.setPosition(intakeArmPickupPosition);
+=======
+        intakeHand.setPosition(handClosedPos);
+
+        intakeTimer.startTime();
+        intakeTimer.reset();
+>>>>>>> Stashed changes
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
@@ -178,6 +194,7 @@ public class DrivingPowerPlay extends OpMode {
         rightFront.setPower(driveSpeed * (G1leftStickY + G1leftStickX + 1.2 * -G1rightStickX));
         leftFront.setPower(driveSpeed * (G1leftStickY + -G1leftStickX + 1.2 * G1rightStickX));
 
+<<<<<<< Updated upstream
         // Update lift target using joystick
         current = sliderLeft.getCurrentPosition();
         incr = (int)(G2leftStickY * sliderSpeed);
@@ -199,11 +216,30 @@ public class DrivingPowerPlay extends OpMode {
 
         // Limit lift extension & retraction
         if(target > maxHeight)
+=======
+        if(gamepad2.left_bumper && !limitsPressed) {
+            limitsPressed = true;
+            sliderLimits = !sliderLimits;
+        } else if (!gamepad2.left_bumper) {
+            limitsPressed = false;
+        }
+
+        // Update lift target
+        current =  sliderLeft.getCurrentPosition();
+
+        int current = sliderLeft.getCurrentPosition();
+        int incr = (int)(G2leftStickY * sliderSpeed);
+
+        target += incr;
+
+        // Limit lift extension
+        if(target > maxHeight && sliderLimits)
+>>>>>>> Stashed changes
         {
             target = maxHeight;
         }
 
-        if(target < minHeight)
+        if(target < minHeight && sliderLimits)
         {
             target = minHeight;
         }
@@ -219,8 +255,8 @@ public class DrivingPowerPlay extends OpMode {
 
         // Power motors when more than 10 encoder ticks away from target
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
-            sliderLeft.setPower(0.6);
-            sliderRight.setPower(0.6);
+            sliderLeft.setPower(0.75);
+            sliderRight.setPower(0.75);
         }
 
         // Disable motors when sliders are at bottom
@@ -316,7 +352,12 @@ public class DrivingPowerPlay extends OpMode {
 
         // Driver Hub Telemetry
         telemetry.addData("Power mode: ", turbo ? "Turbo" : "No turbo");
+<<<<<<< Updated upstream
         telemetry.addData("Runtime", runtime);
+=======
+        telemetry.addData("Slider limits: ", sliderLimits ? "On" : "Off");
+        telemetry.addData("runtime", runtime);
+>>>>>>> Stashed changes
         telemetry.addData("Limit Switch", !sliderLimitSwitch.isPressed());
         telemetry.addData("Slider Left: ", sliderLeft.getCurrentPosition());
         telemetry.addData("Slider Right: ", sliderRight.getCurrentPosition());

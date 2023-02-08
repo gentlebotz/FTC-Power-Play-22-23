@@ -128,8 +128,8 @@ public class ForwardAuto extends LinearOpMode {
         sliderLeft = hardwareMap.get(DcMotor.class, "sliderLeft");
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
-        intakeArmServo = hardwareMap.get(Servo.class, "intakeArmServo");
-        intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
+        //intakeArmServo = hardwareMap.get(Servo.class, "intakeArmServo");
+        //intakeWheelServo = hardwareMap.get(CRServo.class, "intakeWheelServo");
 
         // Motor Direction
         rightRear.setDirection(DcMotor.Direction.FORWARD);
@@ -143,20 +143,20 @@ public class ForwardAuto extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        rightRear.setTargetPosition(0);
-        leftRear.setTargetPosition(0);
-        rightFront.setTargetPosition(0);
-        leftFront.setTargetPosition(0);
-
-        rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//        rightRear.setTargetPosition(0);
+//        leftRear.setTargetPosition(0);
+//        rightFront.setTargetPosition(0);
+//        leftFront.setTargetPosition(0);
+//
+//        rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         telemetry.addData("Status: ", "Busy");
         telemetry.update();
@@ -240,31 +240,66 @@ public class ForwardAuto extends LinearOpMode {
         switch(myPipeline.getLocation()) {
             case MID:
                 // Park zone 2 MID
-                rightRear.setTargetPosition(1600);
-                leftRear.setTargetPosition(1600);
-                rightFront.setTargetPosition(1600);
-                leftFront.setTargetPosition(1600);
-
                 rightRear.setPower(0.4);
                 leftRear.setPower(0.4);
                 rightFront.setPower(0.4);
                 leftFront.setPower(0.4);
 
+<<<<<<< Updated upstream
                 while(rightRear.isBusy() || leftFront.isBusy()){
                     // Do nothing
                 }
+=======
+               sleep(2000);
+>>>>>>> Stashed changes
 
                 break;
             case RIGHT:
                 // Park zone 3 RIGHT
-                leftFront.setTargetPosition(1600);
-                rightFront.setTargetPosition(-1600);
-                leftRear.setTargetPosition(-1600);
-                rightRear.setTargetPosition(1600);
+                rightRear.setPower(0.4);
+                leftRear.setPower(-0.4);
+                rightFront.setPower(-0.4);
+                leftFront.setPower(0.4);
+
+<<<<<<< Updated upstream
+                while(rightRear.isBusy() || leftFront.isBusy()){
+                    // Do nothing
+                }
+
+                rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+=======
+               sleep(2000);
+>>>>>>> Stashed changes
+
+                rightRear.setPower(0);
+                leftRear.setPower(0);
+                rightFront.setPower(0);
+                leftFront.setPower(0);
+
+                sleep(500);
 
                 rightRear.setPower(0.4);
                 leftRear.setPower(0.4);
                 rightFront.setPower(0.4);
+                leftFront.setPower(0.4);
+
+<<<<<<< Updated upstream
+                while(rightRear.isBusy() || leftFront.isBusy()){
+                    // Do nothing
+                }
+=======
+                sleep(2000);
+>>>>>>> Stashed changes
+                break;
+            case LEFT:
+                // Park zone 3 RIGHT
+                rightRear.setPower(-0.4);
+                leftRear.setPower(0.4);
+                rightFront.setPower(0.4);
+<<<<<<< Updated upstream
                 leftFront.setPower(0.4);
 
                 while(rightRear.isBusy() || leftFront.isBusy()){
@@ -275,66 +310,41 @@ public class ForwardAuto extends LinearOpMode {
                 rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+=======
+                leftFront.setPower(-0.4);
+>>>>>>> Stashed changes
+
+                sleep(2000);
 
                 rightRear.setPower(0);
                 leftRear.setPower(0);
                 rightFront.setPower(0);
                 leftFront.setPower(0);
 
-                rightRear.setTargetPosition(1600);
-                leftRear.setTargetPosition(1600);
-                rightFront.setTargetPosition(1600);
-                leftFront.setTargetPosition(1600);
+                sleep(500);
 
                 rightRear.setPower(0.4);
                 leftRear.setPower(0.4);
                 rightFront.setPower(0.4);
                 leftFront.setPower(0.4);
 
+<<<<<<< Updated upstream
                 while(rightRear.isBusy() || leftFront.isBusy()){
                     // Do nothing
                 }
+=======
+                sleep(2000);
                 break;
             default:
-                // Park zone 1 LEFT
-                leftFront.setTargetPosition(-1600);
-                rightFront.setTargetPosition(1600);
-                leftRear.setTargetPosition(1600);
-                rightRear.setTargetPosition(-1600);
-
+                // Park zone 2 MID
                 rightRear.setPower(0.4);
                 leftRear.setPower(0.4);
                 rightFront.setPower(0.4);
                 leftFront.setPower(0.4);
 
-                while(rightRear.isBusy() || leftFront.isBusy()){
-                    // Do nothing
-                }
+                sleep(2000);
 
-                rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-
-                rightRear.setPower(0);
-                leftRear.setPower(0);
-                rightFront.setPower(0);
-                leftFront.setPower(0);
-
-                rightRear.setTargetPosition(1600);
-                leftRear.setTargetPosition(1600);
-                rightFront.setTargetPosition(1600);
-                leftFront.setTargetPosition(1600);
-
-                rightRear.setPower(0.4);
-                leftRear.setPower(0.4);
-                rightFront.setPower(0.4);
-                leftFront.setPower(0.4);
-
-                while(rightRear.isBusy() || leftFront.isBusy()){
-                    // Do nothing
-                }
+>>>>>>> Stashed changes
                 break;
         }
 

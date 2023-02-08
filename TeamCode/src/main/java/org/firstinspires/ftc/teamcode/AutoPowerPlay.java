@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
@@ -68,16 +69,22 @@ public class AutoPowerPlay extends LinearOpMode {
 
     LiftState liftState = LiftState.LIFT_START;
 
+<<<<<<< Updated upstream
     private int lowPole = 0;
     private int midPole = 2750;
     private int highPole = 5800;
+=======
+    private int lowPole = 1000;
+    private int midPole = 1800;
+    private int highPole = 3000;
+>>>>>>> Stashed changes
 
     private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
-    private double intakeArmDropPosition = 0.1;
+    private double intakeArmDropPosition = 0;
 
-    private double handOpenPos = .8;
-    private double handClosedPos = 0.1;
+    private double handOpenPos = .29;
+    private double handClosedPos = 0.15;
 
     private enum ArmState{
         ARM_INTAKE,
@@ -109,10 +116,6 @@ public class AutoPowerPlay extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        rightRear = hardwareMap.get(DcMotor.class, "rightRear");
-        leftRear = hardwareMap.get(DcMotor.class, "leftRear");
-        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         sliderLeft = hardwareMap.get(DcMotor.class, "sliderLeft");
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
@@ -121,10 +124,6 @@ public class AutoPowerPlay extends LinearOpMode {
         intakeHand = hardwareMap.get(Servo.class, "intakeHand");
 
         //  Motor Direction
-        rightRear.setDirection(DcMotor.Direction.FORWARD);
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
-        rightFront.setDirection(DcMotor.Direction.FORWARD);
-        leftFront.setDirection(DcMotor.Direction.REVERSE);
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
         sliderRight.setDirection(DcMotor.Direction.REVERSE);
         intakeArmServoRight.setDirection(Servo.Direction.REVERSE);
@@ -167,67 +166,55 @@ public class AutoPowerPlay extends LinearOpMode {
         Initialize RoadRunner
          */
 
-        Pose2d startPoseLeft = new Pose2d(-35, -58.33, Math.toRadians(90));
-        Pose2d startPoseRight = new Pose2d(35, -58.33, Math.toRadians(90));
-
-//        if(StartLocation){
-//
-//        }
-//        else{
-//
-//        }
+        Pose2d startPoseLeft = new Pose2d(-36, -60, Math.toRadians(90));
+        Pose2d startPoseRight = new Pose2d(36, -60, Math.toRadians(90));
 
         /*
         Left side trajectories
          */
         TrajectorySequence trajLeft = drive.trajectorySequenceBuilder(startPoseLeft)
                 // Drop preloaded cone
-                .lineToConstantHeading(new Vector2d(-19, -58.33)) // Move to F3
-                .splineToConstantHeading(new Vector2d(-11.67, -40), Math.toRadians(90)) // Move to E3
+                .lineToConstantHeading(new Vector2d(-18, -58.33)) // Move to F3
+                .waitSeconds(.5)
+                .splineToConstantHeading(new Vector2d(-14, -40), Math.toRadians(90)) // Move to E3
 
                 // Slider up, prepare outtake
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                                    sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                        sliderRight.setPower(0.5);
+                                        sliderLeft.setPower(0.5);
 
-                                    sliderRight.setPower(0.5);
-                                    sliderLeft.setPower(0.5);
+                                        sliderRight.setTargetPosition(highPole);
+                                        sliderLeft.setTargetPosition(highPole);
 
-                                    sliderRight.setTargetPosition(800);
-                                    sliderLeft.setTargetPosition(800);
-
-                                    //intakeArmServoLeft.setPosition(intakeArmDropPosition);
+                                        intakeArmServoLeft.setPosition(0.2);
+                                        intakeArmServoRight.setPosition(0.2);
                 })
 
-                .lineToLinearHeading(new Pose2d(-6, -29.33, Math.toRadians(225))) // 45 deg hi approach
+                .lineToLinearHeading(new Pose2d(-4, -27.33, Math.toRadians(45))) // 45 deg hi approach
 
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-                                    //intakeWheelServo.setPower(1);
-                })
-
-                .UNSTABLE_addTemporalMarkerOffset(2, () -> {
-                                    //intakeWheelServo.setPower(0);
-
-                                    sliderRight.setTargetPosition(0);
-                                    sliderLeft.setTargetPosition(0);
+                .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
+                                    intakeHand.setPosition(handClosedPos);
                 })
 
                 .waitSeconds(3)
 
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-                                    sliderRight.setPower(0);
-                                    sliderLeft.setPower(0);
-                })
-
-                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(180))) // Reverse approach back to E3
-                .lineToLinearHeading(new Pose2d(-11.67, -11.67, Math.toRadians(180))) // Move to D3 and rotate for cycles
+                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(90))) // Reverse approach back to E3
+                .lineToConstantHeading(new Vector2d(-11.67, -11.67)) // Move to D3 and rotate for cycles
 
                 // Cycles
                 // .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Move to B3 and rotate for cycles
+                .turn(Math.toRadians(90))
                 .lineToConstantHeading(new Vector2d(-58.33, -11.67)) // Move to cone stack D1
                 .lineToConstantHeading(new Vector2d(-35, -11.67)) // Move to D2
                 .lineToLinearHeading(new Pose2d(-29.33, -6, Math.toRadians(225))) // 45 deg hi approach
                 .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Reverse approach back to D2
+
+                // Parking
+                .lineToConstantHeading(new Vector2d(-58.33, -11.67)) // Location 1
+                .waitSeconds(1)
+                .lineToConstantHeading(new Vector2d(-35, -11.67)) // Location 2
+                .waitSeconds(1)
+                .lineToConstantHeading(new Vector2d(-11.67, -11.67)) // Location 3
 
                 .build();
 
@@ -238,23 +225,19 @@ public class AutoPowerPlay extends LinearOpMode {
 
                 // Slider up, prepare outtake
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-//                                    sliderRight.setPower(0.5);
-//                                    sliderLeft.setPower(0.5);
-//
-//                                    sliderRight.setTargetPosition(800);
-//                                    sliderLeft.setTargetPosition(800);
-//
-//                                    intakeArmServo.setPosition(0);
+                                    sliderRight.setPower(0.5);
+                                    sliderLeft.setPower(0.5);
+
+                                    sliderRight.setTargetPosition(highPole);
+                                    sliderLeft.setTargetPosition(highPole);
+
+                                    intakeArmServoLeft.setPosition(0.2);
                 })
 
                 .lineToLinearHeading(new Pose2d(6, -29.33, Math.toRadians(320))) // 45 deg hi approach
 
                 .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
-//                                    intakeWheelServo.setPower(-1);
-                })
-
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-//                                    intakeWheelServo.setPower(0);
+                                    intakeHand.setPosition(handOpenPos);
                 })
 
                 .waitSeconds(3)
@@ -306,6 +289,17 @@ public class AutoPowerPlay extends LinearOpMode {
 
         drive.setPoseEstimate(startPoseLeft);
 
+        // Telemetry
+        telemetry.addData("Status: ", "Busy");
+        telemetry.update();
+
+        // Pickup preloaded cone
+        intakeHand.setPosition(handClosedPos);
+        sleep(700);
+        intakeArmServoLeft.setPosition(intakeArmMidPosition);
+        intakeArmServoRight.setPosition(intakeArmMidPosition);
+        sleep(1000);
+
         // Slider calibration
         sliderRight.setTargetPosition(400);
         sliderLeft.setTargetPosition(400);
@@ -314,8 +308,13 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
+<<<<<<< Updated upstream
         while(Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10){
             // Move slider up until reaching target
+=======
+        while (Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10 && opModeIsActive()) {
+            //Do nothing
+>>>>>>> Stashed changes
         }
 
         sliderRight.setPower(0);
@@ -325,7 +324,7 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        while(!sliderLimitSwitch.isPressed() && sliderRight.getCurrentPosition() >= -400){
+        while (!sliderLimitSwitch.isPressed() && sliderRight.getCurrentPosition() >= -400 && opModeIsActive()   ) {
             sliderLeft.setPower(-0.2);
             sliderRight.setPower(-0.2);
         }
@@ -345,8 +344,11 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+<<<<<<< Updated upstream
         //intakeArmServo.setPosition(intakeArmMidPosition);
 
+=======
+>>>>>>> Stashed changes
         telemetry.addData("Status: ", "Initialized");
         telemetry.update();
 
