@@ -79,9 +79,9 @@ public class DrivingPowerPlay extends OpMode {
 
     LiftState liftState = LiftState.LIFT_START;
 
-    private int lowPole = 0;
-    private int midPole = 2750;
-    private int highPole = 5800;
+    private int lowPole = 1400;
+    private int midPole = 2700;
+    private int highPole = 3950;
 
     private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
@@ -125,15 +125,9 @@ public class DrivingPowerPlay extends OpMode {
         intakeArmServoRight = hardwareMap.get(Servo.class, "intakeArmServoR");
         intakeHand = hardwareMap.get(Servo.class, "intakeHand");
 
-<<<<<<< Updated upstream
-        // Set motor direction
-        rightRear.setDirection(DcMotor.Direction.FORWARD);
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
-=======
         //  Motor Direction
         rightRear.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.FORWARD);
->>>>>>> Stashed changes
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -149,16 +143,10 @@ public class DrivingPowerPlay extends OpMode {
 
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-<<<<<<< Updated upstream
-
-        intakeArmServoLeft.setPosition(intakeArmPickupPosition);
-        intakeArmServoRight.setPosition(intakeArmPickupPosition);
-=======
         intakeHand.setPosition(handClosedPos);
 
         intakeTimer.startTime();
         intakeTimer.reset();
->>>>>>> Stashed changes
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
@@ -194,14 +182,13 @@ public class DrivingPowerPlay extends OpMode {
         rightFront.setPower(driveSpeed * (G1leftStickY + G1leftStickX + 1.2 * -G1rightStickX));
         leftFront.setPower(driveSpeed * (G1leftStickY + -G1leftStickX + 1.2 * G1rightStickX));
 
-<<<<<<< Updated upstream
         // Update lift target using joystick
         current = sliderLeft.getCurrentPosition();
         incr = (int)(G2leftStickY * sliderSpeed);
 
         target += incr;
 
-        // Or set left target using dpad
+        // Or set lift target using dpad
         if(gamepad2.dpad_up){
             target = highPole;
         }
@@ -214,9 +201,6 @@ public class DrivingPowerPlay extends OpMode {
             target = lowPole;
         }
 
-        // Limit lift extension & retraction
-        if(target > maxHeight)
-=======
         if(gamepad2.left_bumper && !limitsPressed) {
             limitsPressed = true;
             sliderLimits = !sliderLimits;
@@ -224,17 +208,8 @@ public class DrivingPowerPlay extends OpMode {
             limitsPressed = false;
         }
 
-        // Update lift target
-        current =  sliderLeft.getCurrentPosition();
-
-        int current = sliderLeft.getCurrentPosition();
-        int incr = (int)(G2leftStickY * sliderSpeed);
-
-        target += incr;
-
-        // Limit lift extension
+        // Limit lift extension & retraction
         if(target > maxHeight && sliderLimits)
->>>>>>> Stashed changes
         {
             target = maxHeight;
         }
@@ -352,12 +327,8 @@ public class DrivingPowerPlay extends OpMode {
 
         // Driver Hub Telemetry
         telemetry.addData("Power mode: ", turbo ? "Turbo" : "No turbo");
-<<<<<<< Updated upstream
         telemetry.addData("Runtime", runtime);
-=======
         telemetry.addData("Slider limits: ", sliderLimits ? "On" : "Off");
-        telemetry.addData("runtime", runtime);
->>>>>>> Stashed changes
         telemetry.addData("Limit Switch", !sliderLimitSwitch.isPressed());
         telemetry.addData("Slider Left: ", sliderLeft.getCurrentPosition());
         telemetry.addData("Slider Right: ", sliderRight.getCurrentPosition());

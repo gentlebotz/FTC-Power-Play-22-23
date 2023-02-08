@@ -60,24 +60,20 @@ public class AutoPowerPlay extends LinearOpMode {
     private int maxHeight = 6000;
     private int minHeight = -10;
 
-    private enum LiftState{
+    private enum LiftState {
         LIFT_START,
         LIFT_LOW,
         LIFT_MID,
         LIFT_HIGH
-    };
+    }
+
+    ;
 
     LiftState liftState = LiftState.LIFT_START;
 
-<<<<<<< Updated upstream
-    private int lowPole = 0;
-    private int midPole = 2750;
-    private int highPole = 5800;
-=======
-    private int lowPole = 1000;
-    private int midPole = 1800;
-    private int highPole = 3000;
->>>>>>> Stashed changes
+    private int lowPole = 1400;
+    private int midPole = 2700;
+    private int highPole = 3950;
 
     private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
@@ -86,7 +82,7 @@ public class AutoPowerPlay extends LinearOpMode {
     private double handOpenPos = .29;
     private double handClosedPos = 0.15;
 
-    private enum ArmState{
+    private enum ArmState {
         ARM_INTAKE,
         ARM_MID_TO_DROP,
         ARM_MID_TO_INTAKE,
@@ -97,8 +93,8 @@ public class AutoPowerPlay extends LinearOpMode {
 
     ArmState armState = ArmState.ARM_MID_TO_DROP;
 
-    public static double mapRange(double a1, double a2, double b1, double b2, double s){
-        return b1 + ((s - a1)*(b2 - b1))/(a2 - a1);
+    public static double mapRange(double a1, double a2, double b1, double b2, double s) {
+        return b1 + ((s - a1) * (b2 - b1)) / (a2 - a1);
     }
 
     private boolean StartLeft = true;
@@ -119,7 +115,7 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft = hardwareMap.get(DcMotor.class, "sliderLeft");
         sliderRight = hardwareMap.get(DcMotor.class, "sliderRight");
         sliderLimitSwitch = hardwareMap.get(TouchSensor.class, "sliderLimitSwitch");
-        intakeArmServoLeft =  hardwareMap.get(Servo.class, "intakeArmServoL");
+        intakeArmServoLeft = hardwareMap.get(Servo.class, "intakeArmServoL");
         intakeArmServoRight = hardwareMap.get(Servo.class, "intakeArmServoR");
         intakeHand = hardwareMap.get(Servo.class, "intakeHand");
 
@@ -147,17 +143,14 @@ public class AutoPowerPlay extends LinearOpMode {
         webcam.setPipeline(myPipeline = new powerplayPipeline()); // Was PipeLine
 
         // Configuration of Pipeline
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
-            public void onOpened()
-            {
+            public void onOpened() {
                 webcam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
-            public void onError(int errorCode)
-            {
+            public void onError(int errorCode) {
 
             }
         });
@@ -174,47 +167,122 @@ public class AutoPowerPlay extends LinearOpMode {
          */
         TrajectorySequence trajLeft = drive.trajectorySequenceBuilder(startPoseLeft)
                 // Drop preloaded cone
-                .lineToConstantHeading(new Vector2d(-18, -58.33)) // Move to F3
-                .waitSeconds(.5)
-                .splineToConstantHeading(new Vector2d(-14, -40), Math.toRadians(90)) // Move to E3
+                // Sliders up
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
+                                    sliderRight.setPower(0.4);
+                                    sliderLeft.setPower(0.4);
+
+                                    sliderRight.setTargetPosition(highPole);
+                                    sliderLeft.setTargetPosition(highPole);
+                })
+
+                .lineToConstantHeading(new Vector2d(-18.6, -58.33)) // Move to F3
+                .splineToConstantHeading(new Vector2d(-13, -40), Math.toRadians(90)) // Move to E3
 
                 // Slider up, prepare outtake
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                                        sliderRight.setPower(0.5);
-                                        sliderLeft.setPower(0.5);
-
-                                        sliderRight.setTargetPosition(highPole);
-                                        sliderLeft.setTargetPosition(highPole);
-
-                                        intakeArmServoLeft.setPosition(0.2);
-                                        intakeArmServoRight.setPosition(0.2);
+                                    intakeArmServoLeft.setPosition(0.2);
+                                    intakeArmServoRight.setPosition(0.2);
                 })
+
+                .waitSeconds(.4)
 
                 .lineToLinearHeading(new Pose2d(-4, -27.33, Math.toRadians(45))) // 45 deg hi approach
 
-                .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
-                                    intakeHand.setPosition(handClosedPos);
+                // Drop cone
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                                    intakeHand.setPosition(handOpenPos);
                 })
 
                 .waitSeconds(3)
 
+                // Sliders down
+                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+                                    sliderRight.setPower(0.4);
+                                    sliderLeft.setPower(0.4);
+
+                                    sliderRight.setTargetPosition(lowPole);
+                                    sliderLeft.setTargetPosition(lowPole);
+                })
+
                 .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(90))) // Reverse approach back to E3
-                .lineToConstantHeading(new Vector2d(-11.67, -11.67)) // Move to D3 and rotate for cycles
+                .lineToConstantHeading(new Vector2d(-11.67, -12.2)) // Move to D3 and rotate for cycles
 
                 // Cycles
                 // .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Move to B3 and rotate for cycles
                 .turn(Math.toRadians(90))
-                .lineToConstantHeading(new Vector2d(-58.33, -11.67)) // Move to cone stack D1
-                .lineToConstantHeading(new Vector2d(-35, -11.67)) // Move to D2
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
+                                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
+                })
+
+                .lineToConstantHeading(new Vector2d(-58.33, -12.2)) // Move to cone stack D1
+
+                .UNSTABLE_addTemporalMarkerOffset(0.35, () -> {
+                                    sliderRight.setPower(0.2);
+                                    sliderLeft.setPower(0.2);
+
+                                    sliderRight.setTargetPosition(lowPole - 100);
+                                    sliderLeft.setTargetPosition(lowPole - 100);
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(1.25, () -> {
+                                    intakeHand.setPosition(handClosedPos);
+                                    sliderRight.setTargetPosition(lowPole + 200);
+                                  sliderLeft.setTargetPosition(lowPole + 200);
+                })
+
+                .waitSeconds(2)
+
+                .UNSTABLE_addTemporalMarkerOffset(0.1, () -> {
+                                    sliderRight.setPower(0.4);
+                                    sliderLeft.setPower(0.4);
+
+                                    sliderRight.setTargetPosition(highPole);
+                                    sliderLeft.setTargetPosition(highPole);
+                })
+
+                .lineToConstantHeading(new Vector2d(-35, -12.2)) // Move to D2
                 .lineToLinearHeading(new Pose2d(-29.33, -6, Math.toRadians(225))) // 45 deg hi approach
-                .lineToLinearHeading(new Pose2d(-35, -11.67, Math.toRadians(-180))) // Reverse approach back to D2
+
+                // Drop cone
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                                    intakeHand.setPosition(handOpenPos);
+                })
+
+                .waitSeconds(2)
+
+                // Sliders down
+                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+                                    sliderRight.setPower(0.4);
+                                    sliderLeft.setPower(0.4);
+
+                                    sliderRight.setTargetPosition(lowPole);
+                                    sliderLeft.setTargetPosition(lowPole);
+                })
+
+                .lineToLinearHeading(new Pose2d(-35, -12.2, Math.toRadians(-180))) // Reverse approach back to D2
+
+                // Sliders down and setup for driver-controlled
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                                    sliderRight.setPower(0.4);
+                                    sliderLeft.setPower(0.4);
+
+                                    sliderRight.setTargetPosition(0);
+                                    sliderLeft.setTargetPosition(0);
+
+                                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
+                                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
+                                    intakeHand.setPosition(handOpenPos);
+                })
 
                 // Parking
-                .lineToConstantHeading(new Vector2d(-58.33, -11.67)) // Location 1
+                .lineToConstantHeading(new Vector2d(-58.33, -12.2)) // Location 1
                 .waitSeconds(1)
-                .lineToConstantHeading(new Vector2d(-35, -11.67)) // Location 2
+                .lineToConstantHeading(new Vector2d(-35, -12.2)) // Location 2
                 .waitSeconds(1)
-                .lineToConstantHeading(new Vector2d(-11.67, -11.67)) // Location 3
+                .lineToConstantHeading(new Vector2d(-11.67, -12.2)) // Location 3
 
                 .build();
 
@@ -225,19 +293,19 @@ public class AutoPowerPlay extends LinearOpMode {
 
                 // Slider up, prepare outtake
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                                    sliderRight.setPower(0.5);
-                                    sliderLeft.setPower(0.5);
+                    sliderRight.setPower(0.5);
+                    sliderLeft.setPower(0.5);
 
-                                    sliderRight.setTargetPosition(highPole);
-                                    sliderLeft.setTargetPosition(highPole);
+                    sliderRight.setTargetPosition(highPole);
+                    sliderLeft.setTargetPosition(highPole);
 
-                                    intakeArmServoLeft.setPosition(0.2);
+                    intakeArmServoLeft.setPosition(0.2);
                 })
 
                 .lineToLinearHeading(new Pose2d(6, -29.33, Math.toRadians(320))) // 45 deg hi approach
 
                 .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
-                                    intakeHand.setPosition(handOpenPos);
+                    intakeHand.setPosition(handOpenPos);
                 })
 
                 .waitSeconds(3)
@@ -308,15 +376,9 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
-<<<<<<< Updated upstream
-        while(Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10){
-            // Move slider up until reaching target
-=======
         while (Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10 && opModeIsActive()) {
             //Do nothing
->>>>>>> Stashed changes
         }
-
         sliderRight.setPower(0);
         sliderLeft.setPower(0);
 
@@ -324,7 +386,7 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        while (!sliderLimitSwitch.isPressed() && sliderRight.getCurrentPosition() >= -400 && opModeIsActive()   ) {
+        while (!sliderLimitSwitch.isPressed() && sliderRight.getCurrentPosition() >= -400 && opModeIsActive()) {
             sliderLeft.setPower(-0.2);
             sliderRight.setPower(-0.2);
         }
@@ -344,20 +406,16 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-<<<<<<< Updated upstream
         //intakeArmServo.setPosition(intakeArmMidPosition);
-
-=======
->>>>>>> Stashed changes
         telemetry.addData("Status: ", "Initialized");
         telemetry.update();
 
-        while(!isStarted()){
-            if(gamepad1.dpad_left && !StartLeft){
+        while (!isStarted()) {
+            if (gamepad1.dpad_left && !StartLeft) {
 //                telemetry.addData("Starting location: ", "Left Side");
                 StartLeft = true;
                 drive.setPoseEstimate(startPoseLeft);
-            } else if(gamepad1.dpad_right && StartLeft){
+            } else if (gamepad1.dpad_right && StartLeft) {
 //                telemetry.addData("Starting location: ", "Right Side");
                 StartLeft = false;
                 drive.setPoseEstimate(startPoseRight);
@@ -369,7 +427,7 @@ public class AutoPowerPlay extends LinearOpMode {
         }
 
         //Wait until start button is pressed
-        //waitForStart();
+        waitForStart();
 
         while (opModeIsActive()) {
             if (myPipeline.error) {
@@ -383,7 +441,7 @@ public class AutoPowerPlay extends LinearOpMode {
                 if (StartLeft) {
                     drive.followTrajectorySequence(trajLeft);
 
-                    switch(myPipeline.getLocation()) {
+                    switch (myPipeline.getLocation()) {
                         case MID:
                             // Park zone 2 MID
                             drive.followTrajectorySequence(parkLeft1);
@@ -402,32 +460,33 @@ public class AutoPowerPlay extends LinearOpMode {
                 } else {
                     drive.followTrajectorySequence(trajRight);
 
-                    switch(myPipeline.getLocation()) {
+                    switch (myPipeline.getLocation()) {
                         case MID:
                             // Park zone 1
-                            drive.followTrajectorySequence(parkRight1);
+                            //drive.followTrajectorySequence(parkRight1);
                             break;
 
                         case RIGHT:
                             // Park zone 2
-                            drive.followTrajectorySequence(parkRight2);
+                            //drive.followTrajectorySequence(parkRight2);
                             break;
 
                         default:
                             // Park zone 3
-                            drive.followTrajectorySequence(parkRight3);
+                            //drive.followTrajectorySequence(parkRight3);
                             break;
                     }
                 }
             }
 
-            }
-            sliderLeft.setTargetPosition(0);
-            sliderRight.setTargetPosition(0);
-            sliderLeft.setPower(0.25);
-            sliderRight.setPower(0.25);
-            while (opModeIsActive() && Math.abs(0 - sliderLeft.getCurrentPosition()) >= 4) {}
-            sliderLeft.setPower(0);
-            sliderRight.setPower(0);
         }
+        sliderLeft.setTargetPosition(0);
+        sliderRight.setTargetPosition(0);
+        sliderLeft.setPower(0.25);
+        sliderRight.setPower(0.25);
+        while (opModeIsActive() && Math.abs(0 - sliderLeft.getCurrentPosition()) >= 4) {
+        }
+        sliderLeft.setPower(0);
+        sliderRight.setPower(0);
     }
+}

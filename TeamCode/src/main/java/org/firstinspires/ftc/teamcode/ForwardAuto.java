@@ -245,13 +245,10 @@ public class ForwardAuto extends LinearOpMode {
                 rightFront.setPower(0.4);
                 leftFront.setPower(0.4);
 
-<<<<<<< Updated upstream
                 while(rightRear.isBusy() || leftFront.isBusy()){
                     // Do nothing
                 }
-=======
                sleep(2000);
->>>>>>> Stashed changes
 
                 break;
             case RIGHT:
@@ -261,18 +258,11 @@ public class ForwardAuto extends LinearOpMode {
                 rightFront.setPower(-0.4);
                 leftFront.setPower(0.4);
 
-<<<<<<< Updated upstream
                 while(rightRear.isBusy() || leftFront.isBusy()){
                     // Do nothing
                 }
 
-                rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-=======
                sleep(2000);
->>>>>>> Stashed changes
 
                 rightRear.setPower(0);
                 leftRear.setPower(0);
@@ -285,21 +275,16 @@ public class ForwardAuto extends LinearOpMode {
                 leftRear.setPower(0.4);
                 rightFront.setPower(0.4);
                 leftFront.setPower(0.4);
-
-<<<<<<< Updated upstream
                 while(rightRear.isBusy() || leftFront.isBusy()){
                     // Do nothing
                 }
-=======
                 sleep(2000);
->>>>>>> Stashed changes
                 break;
             case LEFT:
                 // Park zone 3 RIGHT
                 rightRear.setPower(-0.4);
                 leftRear.setPower(0.4);
                 rightFront.setPower(0.4);
-<<<<<<< Updated upstream
                 leftFront.setPower(0.4);
 
                 while(rightRear.isBusy() || leftFront.isBusy()){
@@ -310,9 +295,7 @@ public class ForwardAuto extends LinearOpMode {
                 rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-=======
                 leftFront.setPower(-0.4);
->>>>>>> Stashed changes
 
                 sleep(2000);
 
@@ -328,11 +311,9 @@ public class ForwardAuto extends LinearOpMode {
                 rightFront.setPower(0.4);
                 leftFront.setPower(0.4);
 
-<<<<<<< Updated upstream
                 while(rightRear.isBusy() || leftFront.isBusy()){
                     // Do nothing
                 }
-=======
                 sleep(2000);
                 break;
             default:
@@ -343,8 +324,6 @@ public class ForwardAuto extends LinearOpMode {
                 leftFront.setPower(0.4);
 
                 sleep(2000);
-
->>>>>>> Stashed changes
                 break;
         }
 
