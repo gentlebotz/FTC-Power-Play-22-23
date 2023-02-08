@@ -159,8 +159,8 @@ public class AutoPowerPlay extends LinearOpMode {
         Initialize RoadRunner
          */
 
-        Pose2d startPoseLeft = new Pose2d(-36, -60, Math.toRadians(90));
-        Pose2d startPoseRight = new Pose2d(36, -60, Math.toRadians(90));
+        Pose2d startPoseLeft = new Pose2d(-35, -61.25, Math.toRadians(90));
+        Pose2d startPoseRight = new Pose2d(35, -61.25, Math.toRadians(90));
 
         /*
         Left side trajectories
