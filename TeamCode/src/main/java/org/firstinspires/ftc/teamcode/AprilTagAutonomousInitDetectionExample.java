@@ -53,7 +53,7 @@ public class AprilTagAutonomousInitDetectionExample extends LinearOpMode
     // UNITS ARE METERS
     double tagsize = 0.166;
 
-    int ID_TAG_OF_INTEREST = 18; // Tag ID 18 from the 36h11 family
+    int ID_TAG_OF_INTEREST = 1; // Tag ID 18 from the 36h11 family
 
     AprilTagDetection tagOfInterest = null;
 
