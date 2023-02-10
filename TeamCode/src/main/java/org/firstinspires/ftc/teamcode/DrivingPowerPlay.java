@@ -335,6 +335,7 @@ public class DrivingPowerPlay extends OpMode {
         telemetry.addData("Slider Target ", target);
         telemetry.addData("Arm State: ", armState);
         telemetry.addData("Arm Hand: ", intakeHand.getPosition());
+        telemetry.addData("Arm pos: ", intakeArmServoLeft.getPosition());
 
         telemetry.update();
     }

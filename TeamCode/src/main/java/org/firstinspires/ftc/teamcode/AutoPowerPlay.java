@@ -71,10 +71,10 @@ public class AutoPowerPlay extends LinearOpMode {
 
     LiftState liftState = LiftState.LIFT_START;
 
-    private int lowPole = 1400;
-    private int midPole = 2700;
-    private int highPole = 3950;
-    private int stackHight = 1200;
+    private int lowPole = 1630;
+    private int midPole = 3000;
+    private int highPole = 4500;
+    private int stackHight = 1000;
 
     private double intakeArmPickupPosition = 0.8;
     private double intakeArmMidPosition = 0.5;
@@ -207,8 +207,9 @@ public class AutoPowerPlay extends LinearOpMode {
                                     sliderLeft.setTargetPosition(highPole);
                 })
 
-                .lineToConstantHeading(new Vector2d(-18.6, -58.33)) // Move to F3
-                .splineToConstantHeading(new Vector2d(-13, -40), Math.toRadians(90)) // Move to E3
+                .lineToConstantHeading(new Vector2d(-14, -58.33)) // Move to F3
+                .waitSeconds(1)
+                .splineToConstantHeading(new Vector2d(-15.5, -39.7), Math.toRadians(90)) // Move to E3
 
                 // Slider up, prepare outtake
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -216,16 +217,16 @@ public class AutoPowerPlay extends LinearOpMode {
                                     intakeArmServoRight.setPosition(intakeArmFrontDropPosition);
                 })
 
-                .waitSeconds(.3)
+                .waitSeconds(.4)
 
-                .lineToLinearHeading(new Pose2d(-4, -27.33, Math.toRadians(45))) // 45 deg hi approach
+                .lineToLinearHeading(new Pose2d(-8, -28.5, Math.toRadians(38))) // 45 deg hi approach
 
                 // Drop cone
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                .UNSTABLE_addTemporalMarkerOffset(.3, () -> {
                                     intakeHand.setPosition(handOpenPos);
                 })
 
-                .waitSeconds(1.4)
+                .waitSeconds(.6)
 
                 // Sliders down
                 .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
@@ -236,19 +237,19 @@ public class AutoPowerPlay extends LinearOpMode {
                                     sliderLeft.setTargetPosition(lowPole);
                 })
 
-                .lineToLinearHeading(new Pose2d(-11.67, -35, Math.toRadians(90))) // Reverse approach back to E3
-                .lineToConstantHeading(new Vector2d(-11.67, -12.2)) // Move to D3 and rotate for cycles
+                .lineToLinearHeading(new Pose2d(-12.5, -36, Math.toRadians(90))) // Reverse approach back to E3
+                .lineToConstantHeading(new Vector2d(-12, -12.2)) // Move to D3 and rotate for cycles
 
                 // Cycles
                 .turn(Math.toRadians(90))
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
-                                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
+                                    intakeArmServoLeft.setPosition(intakeArmDropPosition);
+                                    intakeArmServoRight.setPosition(intakeArmDropPosition);
                                     intakeHand.setPosition(handOpenPos);
                 })
 
-                .lineToConstantHeading(new Vector2d(-58.33, -12.2)) // Move to cone stack D1
+                .lineToConstantHeading(new Vector2d(-63, -13)) // Move to cone stack D1
 
                 .UNSTABLE_addTemporalMarkerOffset(0.35, () -> {
                                     sliderRight.setPower(0.3);
@@ -273,8 +274,8 @@ public class AutoPowerPlay extends LinearOpMode {
                                     sliderRight.setTargetPosition(highPole);
                                     sliderLeft.setTargetPosition(highPole);
 
-                                    intakeArmServoLeft.setPosition(intakeArmDropPosition);
-                                    intakeArmServoRight.setPosition(intakeArmDropPosition);
+                                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
+                                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
                 })
 
                 .lineToConstantHeading(new Vector2d(-35, -12.2)) // Move to D2
@@ -295,8 +296,10 @@ public class AutoPowerPlay extends LinearOpMode {
                                     sliderRight.setTargetPosition(lowPole);
                                     sliderLeft.setTargetPosition(lowPole);
 
-                                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
-                                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
+                                    intakeHand.setPosition(handClosedPos);
+
+                                    intakeArmServoLeft.setPosition(intakeArmDropPosition);
+                                    intakeArmServoRight.setPosition(intakeArmDropPosition);
                 })
 
                 .lineToLinearHeading(new Pose2d(-35, -12.2, Math.toRadians(-180))) // Reverse approach back to D2
@@ -461,16 +464,17 @@ public class AutoPowerPlay extends LinearOpMode {
             if (gamepad2.a) {
                 intakeArmServoLeft.setPosition(intakeArmMidPosition);
                 intakeArmServoRight.setPosition(intakeArmMidPosition);
+                intakeHand.setPosition(handClosedPos);
             } else if (gamepad2.b) {
-                intakeArmServoLeft.setPosition(intakeArmPickupPosition);
-                intakeArmServoRight.setPosition(intakeArmPickupPosition);
+                intakeArmServoLeft.setPosition(intakeArmFrontDropPosition);
+                intakeArmServoRight.setPosition(intakeArmFrontDropPosition);
             }
 
             if (gamepad2.x && !initHandPressed) {
                 initHandPressed = true;
                 initHandClosed = !initHandClosed;
                 intakeHand.setPosition(initHandClosed ? handClosedPos : handOpenPos);
-            } else {
+            } else if (!gamepad2.x) {
                 initHandPressed = false;
             }
 
