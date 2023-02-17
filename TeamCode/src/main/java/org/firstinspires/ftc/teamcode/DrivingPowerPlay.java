@@ -135,8 +135,8 @@ public class DrivingPowerPlay extends OpMode {
         intakeArmServoRight.setDirection(Servo.Direction.REVERSE);
 
         // Set encoder mode
-        sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         sliderLeft.setTargetPosition(0);
         sliderRight.setTargetPosition(0);

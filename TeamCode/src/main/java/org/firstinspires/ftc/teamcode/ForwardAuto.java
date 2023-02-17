@@ -206,7 +206,7 @@ public class ForwardAuto extends LinearOpMode {
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setPower(0.5);
         sliderLeft.setPower(0.5);
-        while (Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10) {
+        while (Math.abs(400 - sliderLeft.getCurrentPosition()) >= 10 && !isStopRequested()) {
             // Keep moving up until reaching target
         }
 
@@ -217,7 +217,7 @@ public class ForwardAuto extends LinearOpMode {
         sliderLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sliderRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        while (!sliderLimitSwitch.isPressed() && sliderLeft.getCurrentPosition() >= -400) {
+        while (!sliderLimitSwitch.isPressed() && sliderLeft.getCurrentPosition() >= -400 && !isStopRequested()) {
             sliderLeft.setPower(-0.2);
             sliderRight.setPower(-0.2);
         }
@@ -313,8 +313,8 @@ public class ForwardAuto extends LinearOpMode {
 
         waitForStart();
 
-        switch(myPipeline.getLocation()) {
-            case MID:
+        switch(detectedID) {
+            case 2:
                 // Park zone 2 MID
                 rightRear.setPower(0.4);
                 leftRear.setPower(0.4);
@@ -327,7 +327,7 @@ public class ForwardAuto extends LinearOpMode {
                sleep(2000);
 
                 break;
-            case RIGHT:
+            case 3:
                 // Park zone 3 RIGHT
                 rightRear.setPower(0.4);
                 leftRear.setPower(-0.4);
@@ -356,7 +356,7 @@ public class ForwardAuto extends LinearOpMode {
                 }
                 sleep(2000);
                 break;
-            case LEFT:
+            case 1:
                 // Park zone 3 RIGHT
                 rightRear.setPower(-0.4);
                 leftRear.setPower(0.4);
