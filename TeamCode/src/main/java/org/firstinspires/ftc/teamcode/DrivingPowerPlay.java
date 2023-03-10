@@ -60,7 +60,7 @@ public class DrivingPowerPlay extends OpMode {
 
     // Slider, Intake variables
     private int target = 0;
-    private int sliderSpeed = 200;
+    private int sliderSpeed = 300;
     private int current;
     private int incr;
     private int maxHeight = 6000;
@@ -126,8 +126,8 @@ public class DrivingPowerPlay extends OpMode {
         intakeHand = hardwareMap.get(Servo.class, "intakeHand");
 
         //  Motor Direction
-        rightRear.setDirection(DcMotor.Direction.REVERSE);
-        leftRear.setDirection(DcMotor.Direction.FORWARD);
+        rightRear.setDirection(DcMotor.Direction.FORWARD);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
@@ -135,8 +135,8 @@ public class DrivingPowerPlay extends OpMode {
         intakeArmServoRight.setDirection(Servo.Direction.REVERSE);
 
         // Set encoder mode
-//        sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         sliderLeft.setTargetPosition(0);
         sliderRight.setTargetPosition(0);
@@ -147,6 +147,15 @@ public class DrivingPowerPlay extends OpMode {
 
         intakeTimer.startTime();
         intakeTimer.reset();
+
+        // Retrieve the IMU from the hardware map
+        //imu = hardwareMap.get(IMU.class, "imu");
+        // Adjust the orientation parameters to match your robot
+//        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+//                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+//                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+//        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
+//        imu.initialize(parameters);
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
@@ -176,11 +185,36 @@ public class DrivingPowerPlay extends OpMode {
         double G2rightStickX = -gamepad2.right_stick_x;
         double G2leftStickY = -gamepad2.left_stick_y;
 
-        // Holonomic mecanum wheel movement
-        rightRear.setPower(driveSpeed * (G1leftStickY + -G1leftStickX + 1.2 * -G1rightStickX));
-        leftRear.setPower(driveSpeed * (G1leftStickY + G1leftStickX + 1.2 * G1rightStickX));
-        rightFront.setPower(driveSpeed * (G1leftStickY + G1leftStickX + 1.2 * -G1rightStickX));
-        leftFront.setPower(driveSpeed * (G1leftStickY + -G1leftStickX + 1.2 * G1rightStickX));
+        //  Holonomic mecanum wheel movement - Straight    - Strafe      - Turn
+        rightRear.setPower(driveSpeed * (G1leftStickY + 1.2 * -G1leftStickX + 1.2 * -G1rightStickX));
+        leftRear.setPower(driveSpeed * (G1leftStickY + 1.2 * G1leftStickX + 1.2 * G1rightStickX));
+        rightFront.setPower(driveSpeed * (G1leftStickY + 1.2 * G1leftStickX + 1.2 * -G1rightStickX));
+        leftFront.setPower(driveSpeed * (G1leftStickY + 1.2 * -G1leftStickX + 1.2 * G1rightStickX));
+
+        if (gamepad1.options) {
+            //imu.resetYaw();
+        }
+        //double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+//        double rotX = G1leftStickX * Math.cos(-botHeading) - G1leftStickY * Math.sin(-botHeading);
+//        double rotY = G1leftStickX * Math.sin(-botHeading) + G1leftStickY * Math.cos(-botHeading);
+//
+//        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(G1rightStickX), 1);
+//        double frontLeftPower = (rotY + rotX + G1rightStickX) / denominator;
+//        double backLeftPower = (rotY - rotX + G1rightStickX) / denominator;
+//        double frontRightPower = (rotY - rotX - G1rightStickX) / denominator;
+//        double backRightPower = (rotY + rotX - G1rightStickX) / denominator;
+
+//        rightRear.setPower(backRightPower);
+//        leftRear.setPower(backLeftPower);
+//        rightFront.setPower(frontRightPower);
+//        leftFront.setPower(frontLeftPower);
+
+
+        if(gamepad2.back) {
+            sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            sliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
 
         // Update lift target using joystick
         current = sliderLeft.getCurrentPosition();
@@ -230,20 +264,14 @@ public class DrivingPowerPlay extends OpMode {
 
         // Power motors when more than 10 encoder ticks away from target
         if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 10 || Math.abs(target - sliderRight.getCurrentPosition()) >= 10){
-            sliderLeft.setPower(0.75);
-            sliderRight.setPower(0.75);
+            sliderLeft.setPower(1);
+            sliderRight.setPower(1);
         }
 
-        // Disable motors when sliders are at bottom
-        else if(sliderLeft.getCurrentPosition() < 10 || sliderRight.getCurrentPosition() < 10){
-            sliderRight.setPower(0);
-            sliderLeft.setPower(0);
-        }
-
-        // Hold motors in position with low power
+        // Disable motors when target is reached
         else {
-            sliderLeft.setPower(0.1);
-            sliderRight.setPower(0.1);
+            sliderLeft.setPower(0);
+            sliderRight.setPower(0);
         }
 
         // Reset intake position
