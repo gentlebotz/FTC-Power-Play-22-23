@@ -83,7 +83,7 @@ public class DrivingPowerPlay extends OpMode {
     private int midPole = 2700;
     private int highPole = 3950;
 
-    private double intakeArmPickupPosition = 0.8;
+    private double intakeArmPickupPosition = 1;
     private double intakeArmMidPosition = 0.5;
     private double intakeArmDropPosition = 0;
 
