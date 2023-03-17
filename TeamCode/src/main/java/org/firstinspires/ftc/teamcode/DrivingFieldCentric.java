@@ -8,7 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-//import com.qualcomm.robotcore.util.Hardware;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 /**
@@ -25,11 +27,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "DrivingPP", group = "Iterative Opmode")
+@TeleOp(name = "DrivingFC", group = "Iterative Opmode")
 //@Disabled
-public class DrivingPowerPlay extends OpMode {
+public class DrivingFieldCentric extends OpMode {
     // Declare OpMode members.
-
     private ElapsedTime runtime = new ElapsedTime();
 
     // Wheels
@@ -46,10 +47,12 @@ public class DrivingPowerPlay extends OpMode {
     private Servo intakeArmServoRight = null;
     private Servo intakeHand = null;
 
+    private IMU imu;
+
     // Variables
     private double power = 1;
-    private double driveSpeed = .5;
-    private double drivePower = .5;
+    private double driveSpeed = .7;
+    private double drivePower = .7;
     private double turboPower = 1;
     private boolean turboStop = true;
     private boolean turbo = false;
@@ -88,7 +91,7 @@ public class DrivingPowerPlay extends OpMode {
     private double intakeArmDropPosition = 0.85;
 
     private double handOpenPos = 0.01;
-    private double handClosedPos = 0.15;
+    private double handClosedPos = 0.13;
 
     private enum ArmState{
         ARM_INTAKE,
@@ -149,13 +152,12 @@ public class DrivingPowerPlay extends OpMode {
         intakeTimer.reset();
 
         // Retrieve the IMU from the hardware map
-        //imu = hardwareMap.get(IMU.class, "imu");
-        // Adjust the orientation parameters to match your robot
-//        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-//                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-//                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
-//        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
-//        imu.initialize(parameters);
+        imu = hardwareMap.get(IMU.class, "imu");
+
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
+        imu.initialize(parameters);
 
         telemetry.addData("Status: ", "Done");
         telemetry.update();
@@ -178,7 +180,7 @@ public class DrivingPowerPlay extends OpMode {
     @Override
     public void loop() {
         // Gamepad Inputs
-        double G1leftStickY = -gamepad1.left_stick_y;
+        double G1leftStickY = gamepad1.left_stick_y;
         double G1leftStickX = -gamepad1.left_stick_x;
         double G1rightStickX = gamepad1.right_stick_x;
         double G2rightStickY = -gamepad2.right_stick_y;
@@ -186,29 +188,30 @@ public class DrivingPowerPlay extends OpMode {
         double G2leftStickY = -gamepad2.left_stick_y;
 
         //  Holonomic mecanum wheel movement - Straight    - Strafe      - Turn
-        rightRear.setPower(driveSpeed * (-G1leftStickY + 1.2 * G1leftStickX + 1.2 * -G1rightStickX));
-        leftRear.setPower(driveSpeed * (-G1leftStickY + 1.2 * -G1leftStickX + 1.2 * G1rightStickX));
-        rightFront.setPower(driveSpeed * (-G1leftStickY + 1.2 * -G1leftStickX + 1.2 * -G1rightStickX));
-        leftFront.setPower(driveSpeed * (-G1leftStickY + 1.2 * G1leftStickX + 1.2 * G1rightStickX));
+//        rightRear.setPower(driveSpeed * (-G1leftStickY + 1.2 * G1leftStickX + 1.2 * -G1rightStickX));
+//        leftRear.setPower(driveSpeed * (-G1leftStickY + 1.2 * -G1leftStickX + 1.2 * G1rightStickX));
+//        rightFront.setPower(driveSpeed * (-G1leftStickY + 1.2 * -G1leftStickX + 1.2 * -G1rightStickX));
+//        leftFront.setPower(driveSpeed * (-G1leftStickY + 1.2 * G1leftStickX + 1.2 * G1rightStickX));
 
         if (gamepad1.options) {
-            //imu.resetYaw();
+            imu.resetYaw();
         }
-        //double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-//        double rotX = G1leftStickX * Math.cos(-botHeading) - G1leftStickY * Math.sin(-botHeading);
-//        double rotY = G1leftStickX * Math.sin(-botHeading) + G1leftStickY * Math.cos(-botHeading);
-//
-//        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(G1rightStickX), 1);
-//        double frontLeftPower = (rotY + rotX + G1rightStickX) / denominator;
-//        double backLeftPower = (rotY - rotX + G1rightStickX) / denominator;
-//        double frontRightPower = (rotY - rotX - G1rightStickX) / denominator;
-//        double backRightPower = (rotY + rotX - G1rightStickX) / denominator;
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-//        rightRear.setPower(backRightPower);
-//        leftRear.setPower(backLeftPower);
-//        rightFront.setPower(frontRightPower);
-//        leftFront.setPower(frontLeftPower);
+        double rotX = G1leftStickX * Math.cos(-botHeading) - G1leftStickY * Math.sin(-botHeading);
+        double rotY = G1leftStickX * Math.sin(-botHeading) + G1leftStickY * Math.cos(-botHeading);
+
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(G1rightStickX), 1.5);
+        double frontLeftPower = (rotY + rotX + G1rightStickX) / denominator;
+        double backLeftPower = (rotY - rotX + G1rightStickX) / denominator;
+        double frontRightPower = (rotY - rotX - G1rightStickX) / denominator;
+        double backRightPower = (rotY + rotX - G1rightStickX) / denominator;
+
+        rightRear.setPower(backRightPower * driveSpeed);
+        leftRear.setPower(backLeftPower * driveSpeed);
+        rightFront.setPower(frontRightPower * driveSpeed);
+        leftFront.setPower(frontLeftPower * driveSpeed);
 
 
         // Reset slider encoders
@@ -270,7 +273,7 @@ public class DrivingPowerPlay extends OpMode {
         sliderRight.setTargetPosition(target);
 
         // Power motors when more than 40 encoder ticks away from target
-        if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 40 || Math.abs(target - sliderRight.getCurrentPosition()) >= 40){
+        if(Math.abs(target - sliderLeft.getCurrentPosition()) >= 60 || Math.abs(target - sliderRight.getCurrentPosition()) >= 60){
             sliderLeft.setPower(1);
             sliderRight.setPower(1);
         }
@@ -292,7 +295,7 @@ public class DrivingPowerPlay extends OpMode {
         }
 
         // Set intake position using finite state machine
-        if(gamepad2.a && !aPressed) {
+        if(gamepad2.a && !aPressed || gamepad2.y && !yPressed) {
             aPressed = true;
             intakeTimer.reset();
 
@@ -350,15 +353,15 @@ public class DrivingPowerPlay extends OpMode {
         }
 
         // Driving turbo mode
-        if (gamepad1.left_bumper && turboStop) {
-            turboStop = false;
-            turbo = !turbo;
-            driveSpeed = turbo ? turboPower : drivePower;
-        }
-
-        else if (!gamepad1.left_bumper) {
-            turboStop = true;
-        }
+//        if (gamepad1.left_bumper && turboStop) {
+//            turboStop = false;
+//            turbo = !turbo;
+//            driveSpeed = turbo ? turboPower : drivePower;
+//        }
+//
+//        else if (!gamepad1.left_bumper) {
+//            turboStop = true;
+//        }
 
         // Driver Hub Telemetry
         telemetry.addData("Power mode: ", turbo ? "Turbo" : "No turbo");

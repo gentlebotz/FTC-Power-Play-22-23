@@ -77,15 +77,16 @@ public class AutoPowerPlay extends LinearOpMode {
     private int highPole = 4100;
     private int stackHight = 1000;
 
-    private double intakeArmPickupPosition = 0.8;
-    private double intakeArmMidPosition = 0.5;
+    private double intakeArmPickupPosition = 0;
+    private double intakeArmMidPosition = 0.3;
     private double intakeArmFrontDropPosition = 0.2;
-    private double intakeArmDropPosition = 0;
+    private double intakeArmDropPosition = 0.85;
+
+    private double handOpenPos = 0.01;
+    private double handClosedPos = 0.13;
 
     private boolean initHandClosed = false;
     private boolean initHandPressed = false;
-    private double handOpenPos = 0.29;
-    private double handClosedPos = 0.1;
 
     private enum ArmState {
         ARM_INTAKE,
@@ -154,8 +155,6 @@ public class AutoPowerPlay extends LinearOpMode {
         sliderLeft.setDirection(DcMotor.Direction.FORWARD);
         sliderRight.setDirection(DcMotor.Direction.REVERSE);
         intakeArmServoRight.setDirection(Servo.Direction.REVERSE);
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
-        rightRear.setDirection(DcMotor.Direction.REVERSE);
 
         //Encoders
         sliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -210,7 +209,7 @@ public class AutoPowerPlay extends LinearOpMode {
                                     sliderLeft.setTargetPosition(highPole);
                 })
 
-                .lineToConstantHeading(new Vector2d(-13, -58.33)) // Move to F3
+                .lineToConstantHeading(new Vector2d(-12, -58.33)) // Move to F3
                 .waitSeconds(1)
                 .splineToConstantHeading(new Vector2d(-15.5, -39.7), Math.toRadians(90)) // Move to E3
 

@@ -47,7 +47,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 1.8898; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 15.66; // in
+    public static double TRACK_WIDTH = 8.8; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -55,8 +55,8 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-    public static double kV = 0.0237734680037419;
-    public static double kA = 0.0025;
+    public static double kV = 0.0286100537478118;
+    public static double kA = 0.0065;
     public static double kStatic = 0.002;
 
     /*
@@ -87,10 +87,10 @@ public class DriveConstants {
      * You are free to raise this on your own if you would like. It is best determined through experimentation.
 
      */
-    public static double MAX_VEL =  30.605872626850477;
-    public static double MAX_ACCEL =  30.605872626850477;
-    public static double MAX_ANG_VEL = 2.099869220356206;
-    public static double MAX_ANG_ACCEL = Math.toRadians(120.31364385583727);
+    public static double MAX_VEL = 58.445175834400814;
+    public static double MAX_ACCEL = 58.445175834400814;
+    public static double MAX_ANG_VEL = 4.697989617416044;
+    public static double MAX_ANG_ACCEL = Math.toRadians(269.17497727421966);
 
 
     public static double encoderTicksToInches(double ticks) {
