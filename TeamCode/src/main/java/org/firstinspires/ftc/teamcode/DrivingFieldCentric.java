@@ -353,15 +353,15 @@ public class DrivingFieldCentric extends OpMode {
         }
 
         // Driving turbo mode
-//        if (gamepad1.left_bumper && turboStop) {
-//            turboStop = false;
-//            turbo = !turbo;
-//            driveSpeed = turbo ? turboPower : drivePower;
-//        }
-//
-//        else if (!gamepad1.left_bumper) {
-//            turboStop = true;
-//        }
+        if (gamepad1.left_bumper && turboStop) {
+            turboStop = false;
+            turbo = !turbo;
+            driveSpeed = turbo ? turboPower : drivePower;
+        }
+
+        else if (!gamepad1.left_bumper) {
+            turboStop = true;
+        }
 
         // Driver Hub Telemetry
         telemetry.addData("Power mode: ", turbo ? "Turbo" : "No turbo");
@@ -374,6 +374,7 @@ public class DrivingFieldCentric extends OpMode {
         telemetry.addData("Arm State: ", armState);
         telemetry.addData("Arm Hand: ", intakeHand.getPosition());
         telemetry.addData("Arm pos: ", intakeArmServoLeft.getPosition());
+        telemetry.addData("botHeading",botHeading);
 
         telemetry.update();
     }

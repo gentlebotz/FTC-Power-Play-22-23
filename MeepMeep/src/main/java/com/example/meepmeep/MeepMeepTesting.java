@@ -35,7 +35,7 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-35, -61.25, Math.toRadians(90))) //Red F2 Starting position
+                        drive.trajectorySequenceBuilder(new Pose2d(-35, -61.25, Math.toRadians(270))) //Red F2 Starting position
 
                                 // Drop preloaded cone
                                 // Sliders up
@@ -47,8 +47,9 @@ public class MeepMeepTesting {
 //                                    sliderLeft.setTargetPosition(highPole);
                                 })
 
-                                .lineToConstantHeading(new Vector2d(-18.6, -58.33)) // Move to F3
-                                .splineToConstantHeading(new Vector2d(-13, -40), Math.toRadians(90)) // Move to E3
+                                .lineToConstantHeading(new Vector2d(-35, -13)) // Move to F3
+                                .lineToLinearHeading(new Pose2d(-4, -13, Math.toRadians(250))) // Move to E3
+                                .lineToLinearHeading(new Pose2d(-15, -13, Math.toRadians(0)))
 
                                 // Slider up, prepare outtake
                                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
