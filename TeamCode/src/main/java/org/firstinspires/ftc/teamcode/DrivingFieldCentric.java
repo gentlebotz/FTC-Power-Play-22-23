@@ -133,8 +133,8 @@ public class DrivingFieldCentric extends OpMode {
         leftRear.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         leftFront.setDirection(DcMotor.Direction.REVERSE);
-        sliderLeft.setDirection(DcMotor.Direction.FORWARD);
-        sliderRight.setDirection(DcMotor.Direction.REVERSE);
+        sliderLeft.setDirection(DcMotor.Direction.REVERSE);
+        sliderRight.setDirection(DcMotor.Direction.FORWARD);
         intakeArmServoRight.setDirection(Servo.Direction.REVERSE);
 
         // Set encoder mode
@@ -146,7 +146,6 @@ public class DrivingFieldCentric extends OpMode {
 
         sliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeHand.setPosition(handClosedPos);
 
         intakeTimer.startTime();
         intakeTimer.reset();
@@ -180,7 +179,7 @@ public class DrivingFieldCentric extends OpMode {
     @Override
     public void loop() {
         // Gamepad Inputs
-        double G1leftStickY = gamepad1.left_stick_y;
+        double G1leftStickY = gamepad1.left_stick_y * 1.1;
         double G1leftStickX = -gamepad1.left_stick_x;
         double G1rightStickX = gamepad1.right_stick_x;
         double G2rightStickY = -gamepad2.right_stick_y;
