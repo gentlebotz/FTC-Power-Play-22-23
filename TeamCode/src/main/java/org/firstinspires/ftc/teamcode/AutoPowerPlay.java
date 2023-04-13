@@ -80,6 +80,7 @@ public class AutoPowerPlay extends LinearOpMode {
     private int stackHeight = 1200;
 
     private double intakeArmDropPosition = 0;
+    private double initpickup = 0.15;
     private double intakeArmMidPosition = 0.3;
     private double intakeArmFrontDropPosition = 0.55;
     private double intakeArmPickupPosition = 0.85;
@@ -223,7 +224,7 @@ public class AutoPowerPlay extends LinearOpMode {
                 })
 
                 .waitSeconds(.5)
-                .lineToLinearHeading(new Pose2d(-24, -6, Math.toRadians(260))) // Move to E3
+                .lineToLinearHeading(new Pose2d(-26, -5.7, Math.toRadians(260))) // Move to E3
 
                 // Drop cone
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -255,9 +256,9 @@ public class AutoPowerPlay extends LinearOpMode {
                     sliderRight.setTargetPosition(lowPole);
                 })
 
-                .lineToLinearHeading(new Pose2d(-35, -14, Math.toRadians(180))) // Move to D3 and rotate for cycles
-                .waitSeconds(.4)
-                .lineToConstantHeading(new Vector2d(-62,-15))
+                .lineToLinearHeading(new Pose2d(-35, -13, Math.toRadians(180))) // Move to D3 and rotate for cycles
+                .waitSeconds(.5)
+                .lineToConstantHeading(new Vector2d(-62,-13))
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                         intakeHand.setPosition(handOpenPos);
@@ -286,7 +287,7 @@ public class AutoPowerPlay extends LinearOpMode {
                     intakeArmServoRight.setPosition(intakeArmDropPosition);
                 })
 
-                .lineToLinearHeading(new Pose2d(-26, -3.5, Math.toRadians(240)))
+                .lineToLinearHeading(new Pose2d(-29.3, -4, Math.toRadians(240)))
 
                 // Drop cone
                 .UNSTABLE_addTemporalMarkerOffset(.5, () -> {
@@ -316,41 +317,115 @@ public class AutoPowerPlay extends LinearOpMode {
         Right Side Trajectories
          */
 
-
-
-        TrajectorySequence trajRight = drive.trajectorySequenceBuilder(startPoseLeft)
+        TrajectorySequence trajRight = drive.trajectorySequenceBuilder(startPoseRight)
                 // Drop preloaded cone
-                .lineToConstantHeading(new Vector2d(19, -58.33)) // Move to F3
-                .splineToConstantHeading(new Vector2d(11.67, -40), Math.toRadians(90)) // Move to E3
-
-                // Slider up, prepare outtake
+                // Sliders up
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    sliderRight.setPower(0.5);
-                    sliderLeft.setPower(0.5);
+                    sliderRight.setPower(1);
+                    sliderLeft.setPower(1);
 
                     sliderRight.setTargetPosition(highPole);
                     sliderLeft.setTargetPosition(highPole);
-
-                    intakeArmServoLeft.setPosition(0.2);
                 })
 
-                .lineToLinearHeading(new Pose2d(6, -29.33, Math.toRadians(320))) // 45 deg hi approach
+                .lineToConstantHeading(new Vector2d(33.5, -59))
+                .splineToConstantHeading(new Vector2d(34, -47), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(35, -6), Math.toRadians(90)) // Move to F3
+                .lineToConstantHeading(new Vector2d(35, -13)) // Move to F3
 
-                .UNSTABLE_addTemporalMarkerOffset(0.4, () -> {
+                // Slider up, prepare outtake
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    intakeArmServoLeft.setPosition(intakeArmDropPosition);
+                    intakeArmServoRight.setPosition(intakeArmDropPosition);
+                })
+
+                .waitSeconds(.5)
+                .lineToLinearHeading(new Pose2d(26, -5.7, Math.toRadians(280))) // Move to E3
+
+                // Drop cone
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     intakeHand.setPosition(handOpenPos);
                 })
 
-                .waitSeconds(3)
+                .waitSeconds(.3)
 
-                .lineToLinearHeading(new Pose2d(11.67, -35, Math.toRadians(0))) // Reverse approach back to E3
-                .lineToLinearHeading(new Pose2d(11.67, -11.67, Math.toRadians(0))) // Move to D3 and rotate for cycles
+                // Sliders down
+                .UNSTABLE_addTemporalMarkerOffset(0.25, () -> {
+                    sliderRight.setPower(1);
+                    sliderLeft.setPower(1);
+
+                    sliderRight.setTargetPosition(lowPole);
+                    sliderLeft.setTargetPosition(lowPole);
+
+                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
+                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
+                    intakeHand.setPosition(handClosedPos);
+                })
+
+                .waitSeconds(.5)
+
+                .build();
+
+        TrajectorySequence rightCycle = drive.trajectorySequenceBuilder(trajRight.end())
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    sliderLeft.setTargetPosition(lowPole);
+                    sliderRight.setTargetPosition(lowPole);
+                })
+
+                .lineToLinearHeading(new Pose2d(35, -13, Math.toRadians(0))) // Move to D3 and rotate for cycles
+                .waitSeconds(.5)
+                .lineToConstantHeading(new Vector2d(62,-13))
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    intakeHand.setPosition(handOpenPos);
+                    sliderRight.setTargetPosition(stackHeight);
+                    sliderLeft.setTargetPosition(stackHeight);
+                })
 
                 // Cycles
-                // .lineToLinearHeading(new Pose2d(35, -11.67, Math.toRadians(180))) // Move to B3 and rotate for cycles
-                .lineToConstantHeading(new Vector2d(58.33, -11.67)) // Move to cone stack D1
-                .lineToConstantHeading(new Vector2d(35, -11.67)) // Move to D2
-                .lineToLinearHeading(new Pose2d(29.33, -6, Math.toRadians(-45))) // 45 deg hi approach
-                .lineToLinearHeading(new Pose2d(35, -11.67, Math.toRadians(0))) // Reverse approach back to D2
+                .UNSTABLE_addTemporalMarkerOffset(0.6, () -> {
+                    intakeHand.setPosition(handClosedPos);
+                })
+
+                .UNSTABLE_addTemporalMarkerOffset(0.75, () -> {
+                    sliderRight.setPower(.8);
+                    sliderLeft.setPower(.8);
+                    sliderRight.setTargetPosition(highPole);
+                    sliderLeft.setTargetPosition(highPole);
+                })
+
+                .waitSeconds(1.5)
+
+                .lineToConstantHeading(new Vector2d(40,-14))
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    intakeArmServoLeft.setPosition(intakeArmDropPosition);
+                    intakeArmServoRight.setPosition(intakeArmDropPosition);
+                })
+
+                .lineToLinearHeading(new Pose2d(29.3, -4, Math.toRadians(300)))
+
+                // Drop cone
+                .UNSTABLE_addTemporalMarkerOffset(.5, () -> {
+                    intakeHand.setPosition(handOpenPos);
+                })
+
+                .waitSeconds(.8)
+
+                // Sliders down
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    sliderRight.setPower(1);
+                    sliderLeft.setPower(1);
+
+                    sliderRight.setTargetPosition(lowPole);
+                    sliderLeft.setTargetPosition(lowPole);
+
+                    intakeArmServoLeft.setPosition(intakeArmPickupPosition);
+                    intakeArmServoRight.setPosition(intakeArmPickupPosition);
+                    intakeHand.setPosition(handClosedPos);
+                })
+
+//                .lineToLinearHeading(new Pose2d(35, -13, Math.toRadians(180))) // Move to D3 and rotate for cycles
 
                 .build();
 
@@ -358,7 +433,7 @@ public class AutoPowerPlay extends LinearOpMode {
         Park trajectories
          */
 
-        TrajectorySequence parkLeft1 = drive.trajectorySequenceBuilder(trajLeft.end())
+        TrajectorySequence parkLeft1 = drive.trajectorySequenceBuilder(leftCycle.end())
                 .lineToLinearHeading(new Pose2d(-35, -14, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
@@ -380,7 +455,7 @@ public class AutoPowerPlay extends LinearOpMode {
                 .waitSeconds(.5)
                 .build();
 
-        TrajectorySequence parkLeft2 = drive.trajectorySequenceBuilder(trajLeft.end())
+        TrajectorySequence parkLeft2 = drive.trajectorySequenceBuilder(leftCycle.end())
                 .lineToLinearHeading(new Pose2d(-35, -14, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
@@ -401,7 +476,7 @@ public class AutoPowerPlay extends LinearOpMode {
                 .waitSeconds(.5) // Location 2
                 .build();
 
-        TrajectorySequence parkLeft3 = drive.trajectorySequenceBuilder(trajLeft.end())
+        TrajectorySequence parkLeft3 = drive.trajectorySequenceBuilder(leftCycle.end())
                 .lineToLinearHeading(new Pose2d(-35, -14, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
@@ -422,8 +497,8 @@ public class AutoPowerPlay extends LinearOpMode {
                 .waitSeconds(.5)
                 .build();
 
-        TrajectorySequence parkRight3 = drive.trajectorySequenceBuilder(trajRight.end())
-                .lineToLinearHeading(new Pose2d(58.33, -11.67, Math.toRadians(270))) // Location 3
+        TrajectorySequence parkRight3 = drive.trajectorySequenceBuilder(rightCycle.end())
+                .lineToLinearHeading(new Pose2d(35, -14, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -438,10 +513,14 @@ public class AutoPowerPlay extends LinearOpMode {
                     intakeHand.setPosition(handClosedPos);
                 })
 
-                .waitSeconds(1)
+
+                .lineToLinearHeading(new Pose2d(60, -12, Math.toRadians(270))) // Location 1
+
+                .waitSeconds(.5)
                 .build();
 
-        TrajectorySequence parkRight2 = drive.trajectorySequenceBuilder(trajRight.end())
+        TrajectorySequence parkRight2 = drive.trajectorySequenceBuilder(rightCycle.end())
+                .lineToLinearHeading(new Pose2d(35, -14, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -456,12 +535,13 @@ public class AutoPowerPlay extends LinearOpMode {
                     intakeHand.setPosition(handClosedPos);
                 })
 
-                .waitSeconds(1) // Location 2
+                .lineToLinearHeading(new Pose2d(35, -12, Math.toRadians(270))) // Location 2
+
+                .waitSeconds(.5) // Location 2
                 .build();
 
-        TrajectorySequence parkRight1 = drive.trajectorySequenceBuilder(trajRight.end())
-                .waitSeconds(2)
-                .lineToConstantHeading(new Vector2d(11.67, -11.67)) // Location 1
+        TrajectorySequence parkRight1 = drive.trajectorySequenceBuilder(rightCycle.end())
+                .lineToLinearHeading(new Pose2d(35, -14, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -476,7 +556,9 @@ public class AutoPowerPlay extends LinearOpMode {
                     intakeHand.setPosition(handClosedPos);
                 })
 
-                .waitSeconds(1)
+                .lineToLinearHeading(new Pose2d(12, -12, Math.toRadians(270))) // Location 3
+
+                .waitSeconds(.5)
                 .build();
 
         drive.setPoseEstimate(startPoseLeft);
@@ -488,8 +570,8 @@ public class AutoPowerPlay extends LinearOpMode {
 //        intakeArmServoRight.setPosition(intakeArmMidPosition);
 //        sleep(1000);
 
-        intakeArmServoRight.setPosition(intakeArmDropPosition);
-        intakeArmServoLeft.setPosition(intakeArmDropPosition);
+        intakeArmServoRight.setPosition(initpickup);
+        intakeArmServoLeft.setPosition(initpickup);
 
         // Slider calibration
         sliderRight.setTargetPosition(700);
@@ -557,8 +639,8 @@ public class AutoPowerPlay extends LinearOpMode {
                 intakeArmServoRight.setPosition(intakeArmMidPosition);
                 intakeHand.setPosition(handClosedPos);
             } else if (gamepad2.b) {
-                intakeArmServoLeft.setPosition(intakeArmDropPosition);
-                intakeArmServoRight.setPosition(intakeArmDropPosition);
+                intakeArmServoLeft.setPosition(initpickup);
+                intakeArmServoRight.setPosition(initpickup);
             }
 
             if (gamepad2.x && !initHandPressed) {
@@ -654,22 +736,24 @@ public class AutoPowerPlay extends LinearOpMode {
                 }
             } else {
                 drive.followTrajectorySequence(trajRight);
-//                drive.followTrajectorySequence(rightCycle);
+                for (int i = 0; i < cycleAmount; i++) {
+                    drive.followTrajectorySequence(leftCycle);
+                }
 
                 switch (detectedID) {
                     case 1:
                         // Park zone 1
-                        //drive.followTrajectorySequence(parkRight1);
+                        drive.followTrajectorySequence(parkRight1);
                         break;
 
                     case 2:
                         // Park zone 2
-                        //drive.followTrajectorySequence(parkRight2);
+                        drive.followTrajectorySequence(parkRight2);
                         break;
 
                     default:
                         // Park zone 3
-                        //drive.followTrajectorySequence(parkRight3);
+                        drive.followTrajectorySequence(parkRight3);
                         break;
                 }
             }
