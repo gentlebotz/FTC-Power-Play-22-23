@@ -258,7 +258,7 @@ public class AutoPowerPlay extends LinearOpMode {
 
                 .lineToLinearHeading(new Pose2d(-35, -13, Math.toRadians(180))) // Move to D3 and rotate for cycles
                 .waitSeconds(.5)
-                .lineToConstantHeading(new Vector2d(-62,-13))
+                .lineToConstantHeading(new Vector2d(-62,-12.25))
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                         intakeHand.setPosition(handOpenPos);
@@ -287,7 +287,9 @@ public class AutoPowerPlay extends LinearOpMode {
                     intakeArmServoRight.setPosition(intakeArmDropPosition);
                 })
 
-                .lineToLinearHeading(new Pose2d(-29.3, -4, Math.toRadians(240)))
+                .waitSeconds(.25)
+
+                .lineToLinearHeading(new Pose2d(-31 , -3.5, Math.toRadians(225)))
 
                 // Drop cone
                 .UNSTABLE_addTemporalMarkerOffset(.5, () -> {
@@ -434,7 +436,7 @@ public class AutoPowerPlay extends LinearOpMode {
          */
 
         TrajectorySequence parkLeft1 = drive.trajectorySequenceBuilder(leftCycle.end())
-                .lineToLinearHeading(new Pose2d(-35, -14, Math.toRadians(270))) // Move to D3
+                .lineToLinearHeading(new Pose2d(-35, -13, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -456,7 +458,7 @@ public class AutoPowerPlay extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkLeft2 = drive.trajectorySequenceBuilder(leftCycle.end())
-                .lineToLinearHeading(new Pose2d(-35, -14, Math.toRadians(270))) // Move to D3
+                .lineToLinearHeading(new Pose2d(-35, -13, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -477,7 +479,7 @@ public class AutoPowerPlay extends LinearOpMode {
                 .build();
 
         TrajectorySequence parkLeft3 = drive.trajectorySequenceBuilder(leftCycle.end())
-                .lineToLinearHeading(new Pose2d(-35, -14, Math.toRadians(270))) // Move to D3
+                .lineToLinearHeading(new Pose2d(-35, -13, Math.toRadians(270))) // Move to D3
 
                 // Sliders down
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
